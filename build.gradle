@@ -1,0 +1,47 @@
+plugins {
+  id 'java'
+}
+
+group = 'com.sciencesakura'
+archivesBaseName = 'dbsetup-csv'
+version = '0.0.1-SNAPSHOT'
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+
+repositories {
+  jcenter()
+}
+
+dependencies {
+  implementation 'com.ninja-squad:DbSetup:2.1.0'
+  implementation 'org.apache.commons:commons-csv:1.7'
+  compileOnly 'org.jetbrains:annotations:17.0.0'
+
+  testImplementation 'junit:junit:4.12'
+  testImplementation 'org.powermock:powermock-module-junit4:2.0.4'
+  testImplementation 'org.powermock:powermock-api-mockito2:2.0.4'
+}
+
+tasks.withType(JavaCompile) {
+  options.encoding = 'utf-8'
+}
+
+jar {
+  manifest {
+    attributes(
+        'Implementation-Title': project.name,
+        'Implementation-Vendor': project.group.split('\\.').reverse().join('.'),
+        'Implementation-Version': project.version
+    )
+  }
+}
+
+javadoc {
+  options.encoding = 'utf-8'
+  options.locale = 'en'
+  options.noTimestamp = true
+  options.links(
+      'https://docs.oracle.com/javase/8/docs/api/',
+      'http://dbsetup.ninja-squad.com/apidoc/2.1.0/'
+  )
+}
