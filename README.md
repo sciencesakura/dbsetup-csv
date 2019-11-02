@@ -1,6 +1,6 @@
 # dbsetup-csv: Import CSV using DbSetup
 
-A [DbSetup](http://dbsetup.ninja-squad.com/) extention to import data from external CSV/TSV files.
+A [DbSetup](http://dbsetup.ninja-squad.com/) extension to import data from external CSV/TSV files.
 
 ## Usage
 
@@ -32,7 +32,7 @@ csv("data/vender.tsv").into("vender")
 
 ## Recommended
 
-We recommend using this extention only when the destination table has too many columns to keep your code readable.
+We recommend using this extension only when the destination table has too many columns to keep your code readable.
 
 ## LICENSE
 
