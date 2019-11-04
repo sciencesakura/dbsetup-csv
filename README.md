@@ -2,6 +2,29 @@
 
 A [DbSetup](http://dbsetup.ninja-squad.com/) extension to import data from external CSV/TSV files.
 
+## Requirement
+
+* Java 8 or later
+
+## Installation
+
+Gradle:
+
+```groovy
+testImplementation 'com.sciencesakura:dbsetup-csv:0.0.1'
+```
+
+Maven:
+
+```xml
+<dependency>
+  <groupId>com.sciencesakura</groupId>
+  <artifactId>dbsetup-csv</artifactId>
+  <version>0.0.1</version>
+  <scope>test</scope>
+</dependency>
+```
+
 ## Usage
 
 Here are a few examples:
@@ -34,7 +57,7 @@ csv("data/vender.tsv").into("vender")
 
 We recommend using this extension only when the destination table has too many columns to keep your code readable.
 
-## LICENSE
+## License
 
 MIT License
 
