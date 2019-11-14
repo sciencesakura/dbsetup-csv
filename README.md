@@ -53,6 +53,8 @@ csv("data/vender.tsv").into("vender")
     .build()
 ```
 
+See [API reference](https://sciencesakura.github.io/dbsetup-csv/) for details.
+
 ## Recommended
 
 We recommend using this extension only when the destination table has too many columns to keep your code readable.
