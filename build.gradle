@@ -30,6 +30,7 @@ tasks.withType(JavaCompile) {
 }
 
 javadoc {
+  destinationDir = new File(projectDir, 'docs')
   options.encoding = 'utf-8'
   options.locale = 'en'
   options.noTimestamp = true
@@ -105,4 +106,8 @@ publishing {
 
 signing {
   sign publishing.publications.maven
+}
+
+clean {
+  delete << javadoc.destinationDir
 }
