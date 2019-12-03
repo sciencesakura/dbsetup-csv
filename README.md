@@ -1,5 +1,7 @@
 # dbsetup-csv: Import CSV using DbSetup
 
+[English](README.md) | [日本語](README.ja.md)
+
 A [DbSetup](http://dbsetup.ninja-squad.com/) extension to import data from external CSV/TSV files.
 
 ## Requirement
