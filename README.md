@@ -34,6 +34,7 @@ import static com.sciencesakura.dbsetup.csv.Import.csv;
 ```
 
 ```java
+// `data/customer.csv` must be in classpath.
 Operation operation = sequenceOf(
     truncate("customer"),
     csv("data/customer.csv").into("customer").build()
@@ -48,16 +49,16 @@ By default, the source file is treated as an UTF-8-encoded and comma-delimited f
 // import an ms932-encoded, tab-delimited and no-header file
 csv("data/vender.tsv").into("vender")
     .withCharset("ms932")
-    .withDelimiter("\t")
+    .withDelimiter('\t')
     .withHeader("id", "vender_no", "vender_name", "tel_no", "email_address")
     .build()
 ```
 
 See [API reference](https://sciencesakura.github.io/dbsetup-csv/) for details.
 
-## Recommended
+## Recommendation
 
-We recommend using this extension only when the destination table has too many columns to keep your code readable.
+We recommend using this extension only when the destination table has too many columns to keep your code using the [Insert.Builder](http://dbsetup.ninja-squad.com/apidoc/2.1.0/com/ninja_squad/dbsetup/operation/Insert.Builder.html) class readable.
 
 ## License
 
