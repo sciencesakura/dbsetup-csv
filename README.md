@@ -33,7 +33,7 @@ Maven:
 import static com.sciencesakura.dbsetup.csv.Import.csv;
 
 // `testdata.csv` must be in classpath.
-csv("testdata.csv").into("tablename").build()
+Operation operation = csv("testdata.csv").into("tablename").build()
 DbSetup dbSetup = new DbSetup(destination, operation);
 dbSetup.launch();
 ```
