@@ -2,7 +2,7 @@
 
 [English](README.md) | [日本語](README.ja.md)
 
-外部CSV/TSVファイルからデータ取り込みができる[DbSetup](http://dbsetup.ninja-squad.com/)拡張です.
+CSV/TSVファイルからデータ取り込みができる[DbSetup](http://dbsetup.ninja-squad.com/)拡張機能です.
 
 ## Requirement
 
@@ -29,18 +29,11 @@ Maven:
 
 ## Usage
 
-使用例:
-
 ```java
 import static com.sciencesakura.dbsetup.csv.Import.csv;
-```
 
-```java
-// `data/customer.csv` はクラスパス上にある必要があります
-Operation operation = sequenceOf(
-    truncate("customer"),
-    csv("data/customer.csv").into("customer").build()
-);
+// `testdata.csv`はクラスパス上にある必要があります
+csv("testdata.csv").into("tablename").build()
 DbSetup dbSetup = new DbSetup(destination, operation);
 dbSetup.launch();
 ```
@@ -49,10 +42,10 @@ dbSetup.launch();
 
 ```java
 // ms932エンコード, タブ区切り, ヘッダなしファイルを取り込む
-csv("data/vender.tsv").into("vender")
+csv("testdata.tsv").into("tablename")
     .withCharset("ms932")
     .withDelimiter('\t')
-    .withHeader("id", "vender_no", "vender_name", "tel_no", "email_address")
+    .withHeader("column_1", "column_2", "column_3")
     .build()
 ```
 
@@ -61,6 +54,10 @@ csv("data/vender.tsv").into("vender")
 ## Recommendation
 
 この拡張機能を利用するのは, 取り込み先テーブルの列数が多すぎて[Insert.Builder](http://dbsetup.ninja-squad.com/apidoc/2.1.0/com/ninja_squad/dbsetup/operation/Insert.Builder.html)を使用したコードの可読性が悪くなってしまう場合にのみにすることをお薦めします.
+
+## Prefer Excel ?
+
+→ [dbsetup-spreadsheet](https://github.com/sciencesakura/dbsetup-spreadsheet)
 
 ## License
 
