@@ -44,22 +44,17 @@ import java.util.Collection;
 /**
  * An operation which imports a CSV file into a table.
  * <p>
- * This operation just uses the {@link Insert} operation internal, does not 'upsert'. So almost always you need to use
- * it in combination with {@link com.ninja_squad.dbsetup.operation.Truncate Truncate} or
- * {@link com.ninja_squad.dbsetup.operation.DeleteAll DeleteAll} operations:
+ * Usage:
  * </p>
- * <pre>
- * <code>
- * &#064;Before
- * void setUp() {
- *     Operation operation = sequenceOf(
- *         truncate("user"),
- *         csv("data/customer.csv").into("customer").build());
- *     DbSetup dbSetup = new DbSetup(destination, operation);
- *     dbSetup.launch();
- * }
- * </code>
- * </pre>
+ * <pre><code>
+ * // `testdata.csv` must be in classpath.
+ * Operation operation = csv("testdata.csv").into("tablename").build();
+ * DbSetup dbSetup = new DbSetup(destination, operation);
+ * dbSetup.launch();
+ * </code></pre>
+ * <p>
+ * This operation just uses the {@link Insert} operation internal, does not 'upsert'.
+ * </p>
  */
 public class Import implements Operation {
 
