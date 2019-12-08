@@ -69,6 +69,7 @@ public class Import implements Operation {
      * @param location a location of source file that is the relative path from classpath root
      * @return a new builder
      */
+    @NotNull
     public static Builder csv(@NotNull String location) {
         return new Builder(location);
     }
@@ -154,6 +155,7 @@ public class Import implements Operation {
          *
          * @return a new {@link Import} instance
          */
+        @NotNull
         public Import build() {
             if (table == null) throw new IllegalStateException("'table' has not been specified yet");
             return new Import(this);
@@ -165,6 +167,7 @@ public class Import implements Operation {
          * @param table a table name
          * @return the reference to this object
          */
+        @NotNull
         public Builder into(@NotNull String table) {
             this.table = table;
             return this;
@@ -179,6 +182,7 @@ public class Import implements Operation {
          * @param charset a charset
          * @return the reference to this object
          */
+        @NotNull
         public Builder withCharset(@NotNull Charset charset) {
             this.charset = charset;
             return this;
@@ -193,6 +197,7 @@ public class Import implements Operation {
          * @param charset a charset
          * @return the reference to this object
          */
+        @NotNull
         public Builder withCharset(@NotNull String charset) {
             this.charset = Charset.forName(charset);
             return this;
@@ -207,6 +212,7 @@ public class Import implements Operation {
          * @param delimiter a delimiter character
          * @return the reference to this object
          */
+        @NotNull
         public Builder withDelimiter(char delimiter) {
             this.delimiter = delimiter;
             return this;
@@ -221,6 +227,7 @@ public class Import implements Operation {
          * @param headers headers
          * @return the reference to this object
          */
+        @NotNull
         public Builder withHeader(@NotNull Collection<String> headers) {
             this.headers = headers.toArray(EMPTY_ARRAY);
             return this;
@@ -235,6 +242,7 @@ public class Import implements Operation {
          * @param headers headers
          * @return the reference to this object
          */
+        @NotNull
         public Builder withHeader(@NotNull String... headers) {
             this.headers = headers;
             return this;
@@ -249,6 +257,7 @@ public class Import implements Operation {
          * @param nullString a string that represents {@code null} value
          * @return the reference to this object
          */
+        @NotNull
         public Builder withNullAs(@NotNull String nullString) {
             this.nullString = nullString;
             return this;
@@ -263,6 +272,7 @@ public class Import implements Operation {
          * @param quote a quotation mark
          * @return the reference to this object
          */
+        @NotNull
         public Builder withQuote(char quote) {
             this.quote = quote;
             return this;

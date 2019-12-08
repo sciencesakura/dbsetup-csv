@@ -36,7 +36,8 @@ javadoc {
   options.noTimestamp = true
   options.links(
     'https://docs.oracle.com/javase/8/docs/api/',
-    'http://dbsetup.ninja-squad.com/apidoc/2.1.0/'
+    'http://dbsetup.ninja-squad.com/apidoc/2.1.0/',
+    'https://javadoc.io/doc/org.jetbrains/annotations/17.0.0/'
   )
 }
 
