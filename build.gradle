@@ -20,13 +20,18 @@ dependencies {
   implementation 'org.apache.commons:commons-csv:1.7'
   compileOnly 'org.jetbrains:annotations:17.0.0'
 
-  testImplementation 'junit:junit:4.12'
-  testImplementation 'org.powermock:powermock-module-junit4:2.0.4'
-  testImplementation 'org.powermock:powermock-api-mockito2:2.0.4'
+  testImplementation 'org.junit.jupiter:junit-jupiter-api:5.5.2'
+  testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.5.2'
+  testImplementation 'org.assertj:assertj-db:1.2.0'
+  testRuntimeOnly 'com.h2database:h2:1.4.200'
 }
 
 tasks.withType(JavaCompile) {
   options.encoding = 'utf-8'
+}
+
+test {
+  useJUnitPlatform()
 }
 
 javadoc {
