@@ -1,5 +1,5 @@
 plugins {
-  id 'java'
+  id 'java-library'
   id 'maven-publish'
   id 'signing'
 }
@@ -8,8 +8,6 @@ group = 'com.sciencesakura'
 archivesBaseName = 'dbsetup-csv'
 version = '0.0.2-SNAPSHOT'
 description = 'An extension of DbSetup to import data from external CSV/TSV files.'
-sourceCompatibility = 1.8
-targetCompatibility = 1.8
 
 repositories {
   jcenter()
@@ -30,6 +28,13 @@ tasks.withType(JavaCompile) {
   options.encoding = 'utf-8'
 }
 
+java {
+  sourceCompatibility = JavaVersion.VERSION_1_8
+  targetCompatibility = JavaVersion.VERSION_1_8
+  withJavadocJar()
+  withSourcesJar()
+}
+
 test {
   useJUnitPlatform()
 }
@@ -37,10 +42,10 @@ test {
 javadoc {
   destinationDir = new File(projectDir, 'docs')
   options.encoding = 'utf-8'
-  options.locale = 'en'
+  options.locale = 'en_EN'
   options.noTimestamp = true
   options.links(
-    'https://docs.oracle.com/javase/8/docs/api/',
+    'https://docs.oracle.com/en/java/javase/13/docs/api/',
     'http://dbsetup.ninja-squad.com/apidoc/2.1.0/',
     'https://javadoc.io/doc/org.jetbrains/annotations/17.0.0/'
   )
@@ -59,22 +64,10 @@ tasks.withType(Jar) {
   }
 }
 
-task javadocJar(type: Jar, dependsOn: javadoc) {
-  archiveClassifier.set('javadoc')
-  from javadoc.destinationDir
-}
-
-task sourcesJar(type: Jar) {
-  archiveClassifier.set('sources')
-  from sourceSets.main.allSource
-}
-
 publishing {
   publications {
     maven(MavenPublication) {
       from components.java
-      artifact sourcesJar
-      artifact javadocJar
       pom {
         name = project.name
         description = project.description
