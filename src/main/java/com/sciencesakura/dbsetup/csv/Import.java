@@ -40,7 +40,6 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Collection;
 
-import static com.ninja_squad.dbsetup.Operations.insertInto;
 import static java.util.Objects.requireNonNull;
 
 /**
@@ -105,7 +104,7 @@ public class Import implements Operation {
 
     private Import(Builder builder) {
         CSVFormat format = createFormat(builder);
-        Insert.Builder ib = insertInto(builder.table);
+        Insert.Builder ib = Insert.into(builder.table);
         try (CSVParser csv = CSVParser.parse(builder.location.openStream(), builder.charset, format)) {
             ib.columns(csv.getHeaderNames().toArray(EMPTY_ARRAY));
             csv.forEach(row -> ib.values(toArray(row)));
