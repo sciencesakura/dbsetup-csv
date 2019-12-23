@@ -33,11 +33,16 @@ import org.assertj.db.type.Source;
 import org.assertj.db.type.Table;
 import org.assertj.db.type.TimeValue;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.Arrays;
+import java.util.Collection;
 
 import static com.sciencesakura.dbsetup.csv.Import.csv;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -117,10 +122,171 @@ class ImportTest {
                 .column("f").value().isFalse();
     }
 
-    @Test
-    void file_not_found() {
-        assertThatThrownBy(() -> csv("data/file_not_found"))
-                .hasMessage("specified resource was not found: data/file_not_found");
+    @Nested
+    class IllegalArgument {
+
+        @Test
+        void file_not_found() {
+            assertThatThrownBy(() -> csv("data/file_not_found"))
+                    .isInstanceOf(IllegalArgumentException.class)
+                    .hasMessage("data/file_not_found not found");
+        }
+
+        @Test
+        void location_is_null() {
+            String location = null;
+            assertThatThrownBy(() -> csv(location))
+                    .hasMessage("location must not be null");
+        }
+
+        @Test
+        void table_is_null() {
+            String table = null;
+            assertThatThrownBy(() -> csv("data/default.csv").into(table))
+                    .hasMessage("table must not be null");
+        }
+
+        @Test
+        void charset_charset_is_null() {
+            Charset charset = null;
+            assertThatThrownBy(() -> csv("data/default.csv").withCharset(charset))
+                    .hasMessage("charset must not be null");
+        }
+
+        @Test
+        void string_charset_is_null() {
+            String charset = null;
+            assertThatThrownBy(() -> csv("data/default.csv").withCharset(charset))
+                    .hasMessage("charset must not be null");
+        }
+
+        @Test
+        void collection_header_is_null() {
+            Collection<String> headers = null;
+            assertThatThrownBy(() -> csv("data/default.csv").withHeader(headers))
+                    .hasMessage("headers must not be null");
+        }
+
+        @Test
+        void collection_header_contains_null() {
+            Collection<String> headers = Arrays.asList("a", null);
+            assertThatThrownBy(() -> csv("data/default.csv").withHeader(headers))
+                    .hasMessage("headers must not contain null");
+        }
+
+        @Test
+        void array_header_is_null() {
+            String[] headers = null;
+            assertThatThrownBy(() -> csv("data/default.csv").withHeader(headers))
+                    .hasMessage("headers must not be null");
+        }
+
+        @Test
+        void array_header_contains_null() {
+            String[] headers = new String[] {"a", null};
+            assertThatThrownBy(() -> csv("data/default.csv").withHeader(headers))
+                    .hasMessage("headers must not contain null");
+        }
+
+        @Test
+        void nullString_is_null() {
+            String nullString = null;
+            assertThatThrownBy(() -> csv("data/default.csv").withNullAs(nullString))
+                    .hasMessage("nullString must not be null");
+        }
+    }
+
+    @Nested
+    class IllegalState {
+
+        @Test
+        void build_without_table() {
+            Import.Builder ib = csv("data/default.csv");
+            assertThatThrownBy(ib::build)
+                    .isInstanceOf(IllegalStateException.class)
+                    .hasMessage("table has not been specified yet");
+        }
+
+        @Test
+        void build_after_built() {
+            Import.Builder ib = csv("data/default.csv");
+            ib.into("default_csv").build();
+            assertThatThrownBy(ib::build)
+                    .isInstanceOf(IllegalStateException.class)
+                    .hasMessage("this operation has been built already");
+        }
+
+        @Test
+        void into_after_built() {
+            Import.Builder ib = csv("data/default.csv");
+            ib.into("default_csv").build();
+            assertThatThrownBy(() -> ib.into("default_csv"))
+                    .isInstanceOf(IllegalStateException.class)
+                    .hasMessage("this operation has been built already");
+        }
+
+        @Test
+        void charset_charset_after_built() {
+            Import.Builder ib = csv("data/default.csv");
+            ib.into("default_csv").build();
+            assertThatThrownBy(() -> ib.withCharset(StandardCharsets.UTF_8))
+                    .isInstanceOf(IllegalStateException.class)
+                    .hasMessage("this operation has been built already");
+        }
+
+        @Test
+        void string_charset_after_built() {
+            Import.Builder ib = csv("data/default.csv");
+            ib.into("default_csv").build();
+            assertThatThrownBy(() -> ib.withCharset("UTF-8"))
+                    .isInstanceOf(IllegalStateException.class)
+                    .hasMessage("this operation has been built already");
+        }
+
+        @Test
+        void delimiter_after_built() {
+            Import.Builder ib = csv("data/default.csv");
+            ib.into("default_csv").build();
+            assertThatThrownBy(() -> ib.withDelimiter(','))
+                    .isInstanceOf(IllegalStateException.class)
+                    .hasMessage("this operation has been built already");
+        }
+
+        @Test
+        void collection_headers_after_built() {
+            Import.Builder ib = csv("data/default.csv");
+            ib.into("default_csv").build();
+            assertThatThrownBy(() -> ib.withHeader(Arrays.asList("a", "b")))
+                    .isInstanceOf(IllegalStateException.class)
+                    .hasMessage("this operation has been built already");
+        }
+
+        @Test
+        void array_headers_after_built() {
+            Import.Builder ib = csv("data/default.csv");
+            ib.into("default_csv").build();
+            assertThatThrownBy(() -> ib.withHeader("a", "b"))
+                    .isInstanceOf(IllegalStateException.class)
+                    .hasMessage("this operation has been built already");
+        }
+
+        @Test
+        void nullString_after_built() {
+            Import.Builder ib = csv("data/default.csv");
+            ib.into("default_csv").build();
+            assertThatThrownBy(() -> ib.withNullAs("null"))
+                    .isInstanceOf(IllegalStateException.class)
+                    .hasMessage("this operation has been built already");
+        }
+
+        @Test
+        void quote_after_built() {
+            Import.Builder ib = csv("data/default.csv");
+            ib.into("default_csv").build();
+            assertThatThrownBy(() -> ib.withQuote('"'))
+                    .isInstanceOf(IllegalStateException.class)
+                    .hasMessage("this operation has been built already");
+        }
     }
 
     private static DateTimeValue datetime(int year, int month, int dayOfMonth, int hours, int minutes, int seconds) {
