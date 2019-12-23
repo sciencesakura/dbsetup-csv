@@ -1,0 +1,1 @@
+typeSearchIndex = [{"l":"All Classes","url":"allclasses-index.html"},{"p":"com.sciencesakura.dbsetup.csv","l":"Import.Builder"},{"p":"com.sciencesakura.dbsetup.csv","l":"Import"}]
