@@ -40,7 +40,6 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Collection;
 
-import static com.ninja_squad.dbsetup.Operations.insertInto;
 import static java.util.Objects.requireNonNull;
 
 /**
@@ -77,34 +76,7 @@ public class Import implements Operation {
         return new Builder(location);
     }
 
-    private final Charset charset;
-
-    private final CSVFormat format;
-
-    private final URL location;
-
-    private final String table;
-
-    private Import(Builder builder) {
-        charset = builder.charset;
-        format = createFormat(builder);
-        location = builder.location;
-        table = builder.table;
-    }
-
-    @Override
-    public void execute(Connection connection, BinderConfiguration configuration) throws SQLException {
-        Insert.Builder ib = insertInto(table);
-        try (CSVParser csv = CSVParser.parse(location.openStream(), charset, format)) {
-            ib.columns(csv.getHeaderNames().toArray(EMPTY_ARRAY));
-            csv.forEach(row -> ib.values(toArray(row)));
-        } catch (IOException e) {
-            throw new DbSetupRuntimeException("failed to open " + location, e);
-        }
-        ib.build().execute(connection, configuration);
-    }
-
-    private CSVFormat createFormat(Builder builder) {
+    private static CSVFormat createFormat(Builder builder) {
         CSVFormat format = CSVFormat.DEFAULT.withAllowDuplicateHeaderNames(false)
                 .withAllowMissingColumnNames(false)
                 .withDelimiter(builder.delimiter)
@@ -119,13 +91,32 @@ public class Import implements Operation {
         return format;
     }
 
-    private Object[] toArray(CSVRecord row) {
+    private static Object[] toArray(CSVRecord row) {
         int length = row.size();
         String[] values = new String[length];
         for (int i = 0; i < length; i++) {
             values[i] = row.get(i);
         }
         return values;
+    }
+
+    private final Operation internalOperation;
+
+    private Import(Builder builder) {
+        CSVFormat format = createFormat(builder);
+        Insert.Builder ib = Insert.into(builder.table);
+        try (CSVParser csv = CSVParser.parse(builder.location.openStream(), builder.charset, format)) {
+            ib.columns(csv.getHeaderNames().toArray(EMPTY_ARRAY));
+            csv.forEach(row -> ib.values(toArray(row)));
+        } catch (IOException e) {
+            throw new DbSetupRuntimeException("failed to open " + builder.location, e);
+        }
+        internalOperation = ib.build();
+    }
+
+    @Override
+    public void execute(Connection connection, BinderConfiguration configuration) throws SQLException {
+        internalOperation.execute(connection, configuration);
     }
 
     /**
