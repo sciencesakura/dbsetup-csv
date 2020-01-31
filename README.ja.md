@@ -13,7 +13,7 @@ CSV/TSVファイルからデータ取り込みができる[DbSetup](http://dbset
 Gradle:
 
 ```groovy
-testImplementation 'com.sciencesakura:dbsetup-csv:0.0.1'
+testImplementation 'com.sciencesakura:dbsetup-csv:0.0.2'
 ```
 
 Maven:
@@ -22,7 +22,7 @@ Maven:
 <dependency>
   <groupId>com.sciencesakura</groupId>
   <artifactId>dbsetup-csv</artifactId>
-  <version>0.0.1</version>
+  <version>0.0.2</version>
   <scope>test</scope>
 </dependency>
 ```
