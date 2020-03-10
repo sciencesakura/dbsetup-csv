@@ -2,6 +2,7 @@ plugins {
   id 'java-library'
   id 'maven-publish'
   id 'signing'
+  id 'com.github.spotbugs' version '4.0.2'
 }
 
 group = 'com.sciencesakura'
@@ -62,6 +63,10 @@ tasks.withType(Jar) {
   metaInf {
     from new File(projectDir, 'LICENSE')
   }
+}
+
+spotbugs {
+  excludeFilter = file("$projectDir/config/spotbugs/exclude.xml")
 }
 
 publishing {
