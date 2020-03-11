@@ -8,7 +8,7 @@ plugins {
 group = 'com.sciencesakura'
 archivesBaseName = 'dbsetup-csv'
 version = '0.0.3-SNAPSHOT'
-description = 'An extension of DbSetup to import data from external CSV/TSV files.'
+description = 'An extension of DbSetup to import data from CSV/TSV files.'
 
 repositories {
   jcenter()
@@ -41,7 +41,7 @@ test {
 }
 
 javadoc {
-  destinationDir = new File(projectDir, 'docs')
+  destinationDir = file("$projectDir/docs")
   options.encoding = 'utf-8'
   options.locale = 'en_US'
   options.noTimestamp = true
@@ -61,7 +61,7 @@ tasks.withType(Jar) {
     )
   }
   metaInf {
-    from new File(projectDir, 'LICENSE')
+    from file("$projectDir/LICENSE")
   }
 }
 
