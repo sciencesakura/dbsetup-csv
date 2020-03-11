@@ -4,6 +4,8 @@
 
 CSV/TSVファイルからデータ取り込みができる[DbSetup](http://dbsetup.ninja-squad.com/)拡張機能です.
 
+![](https://github.com/sciencesakura/dbsetup-csv/workflows/Java%20CI%20with%20Gradle/badge.svg)
+
 ## Requirement
 
 * Java 8以降
