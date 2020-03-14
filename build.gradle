@@ -7,7 +7,7 @@ plugins {
 
 group = 'com.sciencesakura'
 archivesBaseName = 'dbsetup-csv'
-version = '0.0.3-SNAPSHOT'
+version = '1.0.0'
 description = 'An extension of DbSetup to import data from CSV/TSV files.'
 
 repositories {
