@@ -33,6 +33,7 @@ import org.apache.commons.csv.CSVRecord;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
+import java.io.Serializable;
 import java.net.URL;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
@@ -62,18 +63,18 @@ public class Import implements Operation {
     private static final String[] EMPTY_ARRAY = new String[0];
 
     /**
-     * Creates a new builder.
+     * Creates a new Import.CSV.
      * <p>
      * The specified location string must be the relative path string from classpath root.
      * </p>
      *
      * @param location a location of source file that is the relative path from classpath root
-     * @return a new builder
+     * @return a new Import.CSV
      * @throws IllegalArgumentException if the source file was not found
      */
     @NotNull
-    public static Builder csv(@NotNull String location) {
-        return new Builder(location);
+    public static CSV csv(@NotNull String location) {
+        return new CSV(location);
     }
 
     private static CSVFormat createFormat(Builder builder) {
@@ -105,11 +106,11 @@ public class Import implements Operation {
     private Import(Builder builder) {
         CSVFormat format = createFormat(builder);
         Insert.Builder ib = Insert.into(builder.table);
-        try (CSVParser csv = CSVParser.parse(builder.location.openStream(), builder.charset, format)) {
+        try (CSVParser csv = CSVParser.parse(builder.csv.location.openStream(), builder.charset, format)) {
             ib.columns(csv.getHeaderNames().toArray(EMPTY_ARRAY));
             csv.forEach(row -> ib.values(toArray(row)));
         } catch (IOException e) {
-            throw new DbSetupRuntimeException("failed to open " + builder.location, e);
+            throw new DbSetupRuntimeException("failed to open " + builder.csv.location, e);
         }
         internalOperation = ib.build();
     }
@@ -120,11 +121,43 @@ public class Import implements Operation {
     }
 
     /**
+     * A representation of CSV to import into.
+     */
+    public static class CSV implements Serializable {
+
+        private static final long serialVersionUID = -411937921273901442L;
+
+        private final URL location;
+
+        private CSV(String location) {
+            requireNonNull(location, "location must not be null");
+            this.location = getClass().getClassLoader().getResource(location);
+            if (this.location == null)
+                throw new IllegalArgumentException(location + " not found");
+        }
+
+        /**
+         * Specifies a table to import into.
+         *
+         * @param table a table name
+         * @return a new Import.Builder
+         * @throws IllegalStateException if this builder has built an {@link Import} already
+         */
+        @NotNull
+        public Builder into(@NotNull String table) {
+            requireNonNull(table, "table must not be null");
+            return new Builder(this, table);
+        }
+    }
+
+    /**
      * A builder to create a {@link Import} instance.
      */
     public static class Builder {
 
-        private final URL location;
+        private final CSV csv;
+
+        private final String table;
 
         private Charset charset = StandardCharsets.UTF_8;
 
@@ -136,45 +169,24 @@ public class Import implements Operation {
 
         private char quote = '"';
 
-        private String table;
-
         private boolean built;
 
-        private Builder(String location) {
-            requireNonNull(location, "location must not be null");
-            this.location = getClass().getClassLoader().getResource(location);
-            if (this.location == null)
-                throw new IllegalArgumentException(location + " not found");
+        private Builder(CSV csv, String table) {
+            this.csv = csv;
+            this.table = table;
         }
 
         /**
          * Constructs and returns a new {@link Import} instance.
          *
          * @return a new {@link Import} instance
-         * @throws IllegalStateException if {@code table} has not been specified yet, or if this
-         * builder has built an {@link Import} already
-         */
-        @NotNull
-        public Import build() {
-            if (table == null) throw new IllegalStateException("table has not been specified yet");
-            requireNotBuilt();
-            built = true;
-            return new Import(this);
-        }
-
-        /**
-         * Specifies a table to import into.
-         *
-         * @param table a table name
-         * @return the reference to this object
          * @throws IllegalStateException if this builder has built an {@link Import} already
          */
         @NotNull
-        public Builder into(@NotNull String table) {
+        public Import build() {
             requireNotBuilt();
-            requireNonNull(table, "table must not be null");
-            this.table = table;
-            return this;
+            built = true;
+            return new Import(this);
         }
 
         /**
