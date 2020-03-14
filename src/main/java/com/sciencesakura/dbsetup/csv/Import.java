@@ -45,18 +45,8 @@ import static java.util.Objects.requireNonNull;
 
 /**
  * An operation which imports a CSV file into a table.
- * <p>
- * Usage:
- * </p>
- * <pre><code>
- * // `testdata.csv` must be in classpath.
- * Operation operation = csv("testdata.csv").into("tablename").build();
- * DbSetup dbSetup = new DbSetup(destination, operation);
- * dbSetup.launch();
- * </code></pre>
- * <p>
- * This operation just uses the {@link Insert} operation internal, does not 'upsert'.
- * </p>
+ *
+ * @author sciencesakura
  */
 public class Import implements Operation {
 
@@ -122,6 +112,8 @@ public class Import implements Operation {
 
     /**
      * A representation of CSV to import into.
+     *
+     * @author sciencesakura
      */
     public static class CSV implements Serializable {
 
@@ -152,6 +144,8 @@ public class Import implements Operation {
 
     /**
      * A builder to create a {@link Import} instance.
+     *
+     * @author sciencesakura
      */
     public static class Builder {
 
