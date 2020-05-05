@@ -7,7 +7,7 @@ plugins {
 
 group = 'com.sciencesakura'
 archivesBaseName = 'dbsetup-csv'
-version = '1.0.0'
+version = '1.0.1-SNAPSHOT'
 description = 'An extension of DbSetup to import data from CSV/TSV files.'
 
 repositories {
@@ -46,7 +46,7 @@ javadoc {
   options.locale = 'en_US'
   options.noTimestamp = true
   options.links(
-    'https://docs.oracle.com/en/java/javase/13/docs/api/',
+    'https://docs.oracle.com/en/java/javase/8/docs/api/',
     'http://dbsetup.ninja-squad.com/apidoc/2.1.0/',
     'https://javadoc.io/doc/org.jetbrains/annotations/19.0.0/'
   )

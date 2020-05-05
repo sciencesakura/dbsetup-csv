@@ -4,7 +4,7 @@
 
 A [DbSetup](http://dbsetup.ninja-squad.com/) extension to import data from CSV/TSV files.
 
-![](https://github.com/sciencesakura/dbsetup-csv/workflows/build%20%26%20test/badge.svg)
+![](https://github.com/sciencesakura/dbsetup-csv/workflows/build/badge.svg)
 
 ## Requirement
 
