@@ -25,6 +25,7 @@ package com.sciencesakura.dbsetup.csv;
 
 import com.ninja_squad.dbsetup.DbSetupRuntimeException;
 import com.ninja_squad.dbsetup.bind.BinderConfiguration;
+import com.ninja_squad.dbsetup.generator.ValueGenerator;
 import com.ninja_squad.dbsetup.operation.Insert;
 import com.ninja_squad.dbsetup.operation.Operation;
 import org.apache.commons.csv.CSVFormat;
@@ -40,6 +41,8 @@ import java.nio.charset.StandardCharsets;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Collection;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 import static java.util.Objects.requireNonNull;
 
@@ -98,6 +101,7 @@ public class Import implements Operation {
         Insert.Builder ib = Insert.into(builder.table);
         try (CSVParser csv = CSVParser.parse(builder.csv.location.openStream(), builder.charset, format)) {
             ib.columns(csv.getHeaderNames().toArray(EMPTY_ARRAY));
+            builder.valueGenerators.forEach(ib::withGeneratedValue);
             csv.forEach(row -> ib.values(toArray(row)));
         } catch (IOException e) {
             throw new DbSetupRuntimeException("failed to open " + builder.csv.location, e);
@@ -148,6 +152,8 @@ public class Import implements Operation {
      * @author sciencesakura
      */
     public static class Builder {
+
+        private final Map<String, ValueGenerator<?>> valueGenerators = new LinkedHashMap<>();
 
         private final CSV csv;
 
@@ -233,6 +239,23 @@ public class Import implements Operation {
         public Builder withDelimiter(char delimiter) {
             requireNotBuilt();
             this.delimiter = delimiter;
+            return this;
+        }
+
+        /**
+         * Add the value generator for the specified column.
+         *
+         * @param column         the column name
+         * @param valueGenerator the generator
+         * @return the reference to this object
+         * @throws IllegalStateException if this builder has built an {@link Import} already
+         */
+        @NotNull
+        public Builder withGeneratedValue(@NotNull String column, @NotNull ValueGenerator<?> valueGenerator) {
+            requireNotBuilt();
+            requireNonNull(column, "column must not be null");
+            requireNonNull(valueGenerator, "valueGenerator must not be null");
+            valueGenerators.put(column, valueGenerator);
             return this;
         }
 
