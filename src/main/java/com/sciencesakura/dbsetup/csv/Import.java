@@ -25,6 +25,7 @@ package com.sciencesakura.dbsetup.csv;
 
 import com.ninja_squad.dbsetup.DbSetupRuntimeException;
 import com.ninja_squad.dbsetup.bind.BinderConfiguration;
+import com.ninja_squad.dbsetup.generator.ValueGenerator;
 import com.ninja_squad.dbsetup.operation.Insert;
 import com.ninja_squad.dbsetup.operation.Operation;
 import org.apache.commons.csv.CSVFormat;
@@ -40,26 +41,28 @@ import java.nio.charset.StandardCharsets;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Collection;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 import static java.util.Objects.requireNonNull;
 
 /**
- * An operation which imports a CSV file into a table.
+ * An operation which imports the CSV file into the specified table.
  *
  * @author sciencesakura
  */
 public class Import implements Operation {
 
-    private static final String[] EMPTY_ARRAY = new String[0];
+    private static final String[] EMPTY_ARRAY = {};
 
     /**
-     * Creates a new Import.CSV.
+     * Creates a new {@code Import.CSV} instance.
      * <p>
      * The specified location string must be the relative path string from classpath root.
      * </p>
      *
-     * @param location a location of source file that is the relative path from classpath root
-     * @return a new Import.CSV
+     * @param location the location of the source file that is the relative path from classpath root
+     * @return the new {@code Import.CSV} instance
      * @throws IllegalArgumentException if the source file was not found
      */
     @NotNull
@@ -98,6 +101,7 @@ public class Import implements Operation {
         Insert.Builder ib = Insert.into(builder.table);
         try (CSVParser csv = CSVParser.parse(builder.csv.location.openStream(), builder.charset, format)) {
             ib.columns(csv.getHeaderNames().toArray(EMPTY_ARRAY));
+            builder.valueGenerators.forEach(ib::withGeneratedValue);
             csv.forEach(row -> ib.values(toArray(row)));
         } catch (IOException e) {
             throw new DbSetupRuntimeException("failed to open " + builder.csv.location, e);
@@ -111,7 +115,7 @@ public class Import implements Operation {
     }
 
     /**
-     * A representation of CSV to import into.
+     * A representation of the CSV file.
      *
      * @author sciencesakura
      */
@@ -129,25 +133,29 @@ public class Import implements Operation {
         }
 
         /**
-         * Specifies a table to import into.
+         * Create a new {@code Import.Builder} instance.
          *
-         * @param table a table name
-         * @return a new Import.Builder
-         * @throws IllegalStateException if this builder has built an {@link Import} already
+         * @param table the table name
+         * @return the new {@code Import.Builder} instance
          */
         @NotNull
         public Builder into(@NotNull String table) {
-            requireNonNull(table, "table must not be null");
-            return new Builder(this, table);
+            return new Builder(this, requireNonNull(table, "table must not be null"));
         }
     }
 
     /**
-     * A builder to create a {@link Import} instance.
+     * A builder to create the {@code Import} instance.
+     * <p>
+     * This builder can be used only once. Once it has built {@code Import} instance, builder's
+     * methods will throw an {@code IllegalStateException}.
+     * </p>
      *
      * @author sciencesakura
      */
     public static class Builder {
+
+        private final Map<String, ValueGenerator<?>> valueGenerators = new LinkedHashMap<>();
 
         private final CSV csv;
 
@@ -171,10 +179,10 @@ public class Import implements Operation {
         }
 
         /**
-         * Constructs and returns a new {@link Import} instance.
+         * Build a new {@code Import} instance.
          *
-         * @return a new {@link Import} instance
-         * @throws IllegalStateException if this builder has built an {@link Import} already
+         * @return the new {@code Import} instance
+         * @throws IllegalStateException if this builder has built an {@code Import} already
          */
         @NotNull
         public Import build() {
@@ -184,32 +192,31 @@ public class Import implements Operation {
         }
 
         /**
-         * Specifies a charset of source file.
+         * Specifies a charset of the source file.
          * <p>
          * By default UTF-8 is used.
          * </p>
          *
-         * @param charset a charset
+         * @param charset the charset
          * @return the reference to this object
-         * @throws IllegalStateException if this builder has built an {@link Import} already
+         * @throws IllegalStateException if this builder has built an {@code Import} already
          */
         @NotNull
         public Builder withCharset(@NotNull Charset charset) {
             requireNotBuilt();
-            requireNonNull(charset, "charset must not be null");
-            this.charset = charset;
+            this.charset = requireNonNull(charset, "charset must not be null");
             return this;
         }
 
         /**
-         * Specifies a charset of source file.
+         * Specifies a charset of the source file.
          * <p>
          * By default UTF-8 is used.
          * </p>
          *
-         * @param charset a charset
+         * @param charset the charset name
          * @return the reference to this object
-         * @throws IllegalStateException if this builder has built an {@link Import} already
+         * @throws IllegalStateException if this builder has built an {@code Import} already
          */
         @NotNull
         public Builder withCharset(@NotNull String charset) {
@@ -220,14 +227,14 @@ public class Import implements Operation {
         }
 
         /**
-         * Specifies a delimiter character of source file.
+         * Specifies a delimiter character of the source file.
          * <p>
          * By default {@code ','} is used.
          * </p>
          *
-         * @param delimiter a delimiter character
+         * @param delimiter the delimiter character
          * @return the reference to this object
-         * @throws IllegalStateException if this builder has built an {@link Import} already
+         * @throws IllegalStateException if this builder has built an {@code Import} already
          */
         @NotNull
         public Builder withDelimiter(char delimiter) {
@@ -237,14 +244,31 @@ public class Import implements Operation {
         }
 
         /**
-         * Specifies headers of source file.
+         * Add a value generator for the specified column.
+         *
+         * @param column         the column name
+         * @param valueGenerator the generator
+         * @return the reference to this object
+         * @throws IllegalStateException if this builder has built an {@code Import} already
+         */
+        @NotNull
+        public Builder withGeneratedValue(@NotNull String column, @NotNull ValueGenerator<?> valueGenerator) {
+            requireNotBuilt();
+            requireNonNull(column, "column must not be null");
+            requireNonNull(valueGenerator, "valueGenerator must not be null");
+            valueGenerators.put(column, valueGenerator);
+            return this;
+        }
+
+        /**
+         * Specifies headers of the source file.
          * <p>
-         * By default the first row is used as header.
+         * By default the first row of the source file is used as header.
          * </p>
          *
-         * @param headers headers
+         * @param headers the header names
          * @return the reference to this object
-         * @throws IllegalStateException if this builder has built an {@link Import} already
+         * @throws IllegalStateException if this builder has built an {@code Import} already
          */
         @NotNull
         public Builder withHeader(@NotNull Collection<@NotNull String> headers) {
@@ -253,21 +277,20 @@ public class Import implements Operation {
             this.headers = new String[headers.size()];
             int i = 0;
             for (String header : headers) {
-                requireNonNull(header, "headers must not contain null");
-                this.headers[i++] = header;
+                this.headers[i++] = requireNonNull(header, "headers must not contain null");
             }
             return this;
         }
 
         /**
-         * Specifies headers of source file.
+         * Specifies headers of the source file.
          * <p>
-         * By default the first row is used as header.
+         * By default the first row of the source file is used as header.
          * </p>
          *
-         * @param headers headers
+         * @param headers the header names
          * @return the reference to this object
-         * @throws IllegalStateException if this builder has built an {@link Import} already
+         * @throws IllegalStateException if this builder has built an {@code Import} already
          */
         @NotNull
         public Builder withHeader(@NotNull String... headers) {
@@ -276,8 +299,7 @@ public class Import implements Operation {
             this.headers = new String[headers.length];
             int i = 0;
             for (String header : headers) {
-                requireNonNull(header, "headers must not contain null");
-                this.headers[i++] = header;
+                this.headers[i++] = requireNonNull(header, "headers must not contain null");
             }
             return this;
         }
@@ -288,27 +310,26 @@ public class Import implements Operation {
          * By default {@code ""} (empty string) is used.
          * </p>
          *
-         * @param nullString a string that represents {@code null} value
+         * @param nullString the string that represents {@code null} value
          * @return the reference to this object
-         * @throws IllegalStateException if this builder has built an {@link Import} already
+         * @throws IllegalStateException if this builder has built an {@code Import} already
          */
         @NotNull
         public Builder withNullAs(@NotNull String nullString) {
             requireNotBuilt();
-            requireNonNull(nullString, "nullString must not be null");
-            this.nullString = nullString;
+            this.nullString = requireNonNull(nullString, "nullString must not be null");
             return this;
         }
 
         /**
-         * Specifies a quotation mark of source file.
+         * Specifies a quotation mark of the source file.
          * <p>
          * By default {@code '"'} is used.
          * </p>
          *
-         * @param quote a quotation mark
+         * @param quote the quotation mark
          * @return the reference to this object
-         * @throws IllegalStateException if this builder has built an {@link Import} already
+         * @throws IllegalStateException if this builder has built an {@code Import} already
          */
         @NotNull
         public Builder withQuote(char quote) {

@@ -24,26 +24,26 @@
 package com.sciencesakura.dbsetup.csv;
 
 import com.ninja_squad.dbsetup.DbSetup;
+import com.ninja_squad.dbsetup.destination.DataSourceDestination;
 import com.ninja_squad.dbsetup.destination.Destination;
-import com.ninja_squad.dbsetup.destination.DriverManagerDestination;
+import com.ninja_squad.dbsetup.generator.ValueGenerator;
+import com.ninja_squad.dbsetup.generator.ValueGenerators;
 import com.ninja_squad.dbsetup.operation.Operation;
-import org.assertj.db.type.DateTimeValue;
-import org.assertj.db.type.DateValue;
-import org.assertj.db.type.Source;
 import org.assertj.db.type.Table;
-import org.assertj.db.type.TimeValue;
+import org.flywaydb.core.Flyway;
+import org.flywaydb.core.api.configuration.FluentConfiguration;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
+import javax.sql.DataSource;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
-import java.sql.Connection;
-import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.Arrays;
 import java.util.Collection;
 
+import static com.ninja_squad.dbsetup.Operations.sequenceOf;
+import static com.ninja_squad.dbsetup.Operations.truncate;
 import static com.sciencesakura.dbsetup.csv.Import.csv;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.db.api.Assertions.assertThat;
@@ -51,75 +51,90 @@ import static org.assertj.db.type.Table.Order.asc;
 
 class ImportTest {
 
-    private static final Table.Order[] ORDER_BY_A = new Table.Order[] {asc("a")};
+    private static final Table.Order[] ORDER_BY_PK = {asc("pk")};
+
+    private static DataSource dataSource;
 
     private static Destination destination;
 
-    private static Source source;
-
     @BeforeAll
-    static void setUpClass() throws SQLException {
+    static void setUpClass() {
         String url = "jdbc:h2:mem:ImportTest;DB_CLOSE_DELAY=-1";
-        destination = DriverManagerDestination.with(url, "sa", "");
-        source = new Source(url, "sa", "");
-        try (Connection conn = destination.getConnection(); Statement stmt = conn.createStatement()) {
-            stmt.addBatch("create table default_csv (a int, b decimal(7, 3), c date, d timestamp, e varchar(6), f boolean)");
-            stmt.addBatch("create table pgsql_tsv (a int, b decimal(7, 3), c date, d timestamp, e varchar(6), f boolean)");
-            stmt.executeBatch();
-        }
+        FluentConfiguration conf = Flyway.configure().dataSource(url, "sa", null);
+        conf.load().migrate();
+        dataSource = conf.getDataSource();
+        destination = DataSourceDestination.with(dataSource);
     }
 
     @Test
     void default_csv() {
-        Operation operation = csv("data/default.csv").into("default_csv").build();
+        Operation operation = sequenceOf(
+                truncate("table_1"),
+                csv("data/default.csv").into("table_1")
+                        .withGeneratedValue("pk", ValueGenerators.sequence())
+                        .build());
         DbSetup dbSetup = new DbSetup(destination, operation);
         dbSetup.launch();
-        assertThat(new Table(source, "default_csv", ORDER_BY_A))
-                // 1
+        assertThat(new Table(dataSource, "table_1", ORDER_BY_PK))
                 .row()
+                .column("pk").value().isEqualTo(1)
                 .column("a").value().isEqualTo(100)
-                .column("b").value().isEqualTo(0.5)
-                .column("c").value().isEqualTo(DateValue.of(2019, 12, 1))
-                .column("d").value().isEqualTo(datetime(2019, 12, 1, 9, 30, 1))
-                .column("e").value().isEqualTo("hoge")
-                .column("f").value().isTrue()
-                // 2
+                .column("b").value().isEqualTo(10000000000L)
+                .column("c").value().isEqualTo(0.5)
+                .column("d").value().isEqualTo("2019-12-01")
+                .column("e").value().isEqualTo("2019-12-01T09:30:01.001000000")
+                .column("f").value().isEqualTo("AAA")
+                .column("g").value().isEqualTo("甲")
+                .column("h").value().isTrue()
+                .column("i").value().isNotNull()
                 .row()
+                .column("pk").value().isEqualTo(2)
                 .column("a").value().isEqualTo(200)
-                .column("b").value().isEqualTo(0.25)
-                .column("c").value().isEqualTo(DateValue.of(2019, 12, 2))
-                .column("d").value().isEqualTo(datetime(2019, 12, 2, 9, 30, 2))
-                .column("e").value().isNull()
-                .column("f").value().isFalse();
+                .column("b").value().isEqualTo(20000000000L)
+                .column("c").value().isEqualTo(0.25)
+                .column("d").value().isEqualTo("2019-12-02")
+                .column("e").value().isEqualTo("2019-12-02T09:30:02.002000000")
+                .column("f").value().isEqualTo("BBB")
+                .column("g").value().isEqualTo("乙")
+                .column("h").value().isFalse()
+                .column("i").value().isNull();
     }
 
     @Test
     void pgsql_tsv() {
-        Operation operation = csv("data/pgsql.tsv")
-                .into("pgsql_tsv")
-                .withDelimiter('\t')
-                .withHeader("a", "b", "c", "d", "e", "f")
-                .withNullAs("\\N")
-                .build();
+        Operation operation = sequenceOf(
+                truncate("table_1"),
+                csv("data/pgsql.tsv").into("table_1")
+                        .withGeneratedValue("pk", ValueGenerators.sequence())
+                        .withDelimiter('\t')
+                        .withHeader("a", "b", "c", "d", "e", "f", "g", "h", "i")
+                        .withNullAs("\\N")
+                        .build());
         DbSetup dbSetup = new DbSetup(destination, operation);
         dbSetup.launch();
-        assertThat(new Table(source, "pgsql_tsv", ORDER_BY_A))
-                // 1
+        assertThat(new Table(dataSource, "table_1", ORDER_BY_PK))
                 .row()
+                .column("pk").value().isEqualTo(1)
                 .column("a").value().isEqualTo(100)
-                .column("b").value().isEqualTo(0.5)
-                .column("c").value().isEqualTo(DateValue.of(2019, 12, 1))
-                .column("d").value().isEqualTo(datetime(2019, 12, 1, 9, 30, 1))
-                .column("e").value().isEqualTo("hoge")
-                .column("f").value().isTrue()
-                // 2
+                .column("b").value().isEqualTo(10000000000L)
+                .column("c").value().isEqualTo(0.5)
+                .column("d").value().isEqualTo("2019-12-01")
+                .column("e").value().isEqualTo("2019-12-01T09:30:01.001000000")
+                .column("f").value().isEqualTo("AAA")
+                .column("g").value().isEqualTo("甲")
+                .column("h").value().isTrue()
+                .column("i").value().isNotNull()
                 .row()
+                .column("pk").value().isEqualTo(2)
                 .column("a").value().isEqualTo(200)
-                .column("b").value().isEqualTo(0.25)
-                .column("c").value().isEqualTo(DateValue.of(2019, 12, 2))
-                .column("d").value().isEqualTo(datetime(2019, 12, 2, 9, 30, 2))
-                .column("e").value().isNull()
-                .column("f").value().isFalse();
+                .column("b").value().isEqualTo(20000000000L)
+                .column("c").value().isEqualTo(0.25)
+                .column("d").value().isEqualTo("2019-12-02")
+                .column("e").value().isEqualTo("2019-12-02T09:30:02.002000000")
+                .column("f").value().isEqualTo("BBB")
+                .column("g").value().isEqualTo("乙")
+                .column("h").value().isFalse()
+                .column("i").value().isNull();
     }
 
     @Nested
@@ -165,6 +180,26 @@ class ImportTest {
         }
 
         @Test
+        void value_generator_column_is_null() {
+            String table = "table";
+            String column = null;
+            ValueGenerator<?> valueGenerator = ValueGenerators.sequence();
+            assertThatThrownBy(() -> csv("data/default.csv").into(table)
+                    .withGeneratedValue(column, valueGenerator))
+                    .hasMessage("column must not be null");
+        }
+
+        @Test
+        void value_generator_generator_is_null() {
+            String table = "table";
+            String column = "column";
+            ValueGenerator<?> valueGenerator = null;
+            assertThatThrownBy(() -> csv("data/default.csv").into(table)
+                    .withGeneratedValue(column, valueGenerator))
+                    .hasMessage("valueGenerator must not be null");
+        }
+
+        @Test
         void collection_header_is_null() {
             String table = "table";
             Collection<String> headers = null;
@@ -194,7 +229,7 @@ class ImportTest {
         @Test
         void array_header_contains_null() {
             String table = "table";
-            String[] headers = new String[] {"a", null};
+            String[] headers = {"a", null};
             assertThatThrownBy(() -> csv("data/default.csv").into(table)
                     .withHeader(headers))
                     .hasMessage("headers must not contain null");
@@ -254,6 +289,16 @@ class ImportTest {
         }
 
         @Test
+        void value_generator_after_built() {
+            String table = "table";
+            Import.Builder ib = csv("data/default.csv").into(table);
+            ib.build();
+            assertThatThrownBy(() -> ib.withGeneratedValue("column", ValueGenerators.sequence()))
+                    .isInstanceOf(IllegalStateException.class)
+                    .hasMessage("this operation has been built already");
+        }
+
+        @Test
         void collection_headers_after_built() {
             String table = "table";
             Import.Builder ib = csv("data/default.csv").into(table);
@@ -292,11 +337,5 @@ class ImportTest {
                     .isInstanceOf(IllegalStateException.class)
                     .hasMessage("this operation has been built already");
         }
-    }
-
-    private static DateTimeValue datetime(int year, int month, int dayOfMonth, int hours, int minutes, int seconds) {
-        DateValue d = DateValue.of(year, month, dayOfMonth);
-        TimeValue t = TimeValue.of(hours, minutes, seconds);
-        return DateTimeValue.of(d, t);
     }
 }
