@@ -7,7 +7,7 @@ plugins {
 
 group = 'com.sciencesakura'
 archivesBaseName = 'dbsetup-csv'
-version = '1.0.1-SNAPSHOT'
+version = '1.0.1'
 description = 'An extension of DbSetup to import data from CSV/TSV files.'
 
 repositories {
@@ -75,6 +75,10 @@ publishing {
         name = project.name
         description = project.description
         url = 'https://github.com/sciencesakura/dbsetup-csv'
+        organization {
+          name = 'sciencesakura.com'
+          url = 'https://www.sciencesakura.com/'
+        }
         licenses {
           license {
             name = 'MIT License'
