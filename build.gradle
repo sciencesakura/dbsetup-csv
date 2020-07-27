@@ -1,119 +1,71 @@
-plugins {
-  id 'java-library'
-  id 'maven-publish'
-  id 'signing'
-  id 'com.github.spotbugs' version '4.4.4'
-}
+allprojects {
+  group = 'com.sciencesakura'
+  version = '1.0.2-SNAPSHOT'
+  description = 'An extension of DbSetup to import data from CSV/TSV files.'
 
-group = 'com.sciencesakura'
-archivesBaseName = 'dbsetup-csv'
-version = '1.0.1'
-description = 'An extension of DbSetup to import data from CSV/TSV files.'
-
-repositories {
-  jcenter()
-}
-
-dependencies {
-  api 'com.ninja-squad:DbSetup:2.1.0'
-  implementation 'org.apache.commons:commons-csv:1.8'
-  compileOnly 'org.jetbrains:annotations:19.0.0'
-
-  testImplementation 'org.flywaydb:flyway-core:6.5.2'
-  testImplementation 'org.junit.jupiter:junit-jupiter:5.6.2'
-  testImplementation 'org.assertj:assertj-db:2.0.0'
-  testRuntimeOnly 'com.h2database:h2:1.4.200'
-}
-
-tasks.withType(JavaCompile) {
-  options.encoding = 'utf-8'
-}
-
-java {
-  sourceCompatibility = JavaVersion.VERSION_1_8
-  targetCompatibility = JavaVersion.VERSION_1_8
-  withJavadocJar()
-  withSourcesJar()
-}
-
-test {
-  useJUnitPlatform()
-}
-
-javadoc {
-  destinationDir = file("$projectDir/docs")
-  options.noTimestamp = true
-  options.links(
-    'https://docs.oracle.com/javase/8/docs/api/',
-    'http://dbsetup.ninja-squad.com/apidoc/2.1.0/',
-    'https://javadoc.io/doc/org.jetbrains/annotations/19.0.0/'
-  )
-}
-
-tasks.withType(Jar) {
-  manifest {
-    attributes(
-      'Implementation-Title': project.name,
-      'Implementation-Vendor': project.group.split('\\.').reverse().join('.'),
-      'Implementation-Version': project.version
-    )
-  }
-  metaInf {
-    from file("$projectDir/LICENSE")
-  }
-}
-
-spotbugs {
-  excludeFilter = file("$projectDir/config/spotbugs/exclude.xml")
-}
-
-publishing {
-  publications {
-    maven(MavenPublication) {
-      from components.java
-      pom {
-        name = project.name
-        description = project.description
-        url = 'https://github.com/sciencesakura/dbsetup-csv'
-        organization {
-          name = 'sciencesakura.com'
-          url = 'https://www.sciencesakura.com/'
-        }
-        licenses {
-          license {
-            name = 'MIT License'
-            url = 'https://opensource.org/licenses/MIT'
-          }
-        }
-        developers {
-          developer {
-            name = 'sciencesakura'
-            email = 'sakurasakurascience@gmail.com'
-          }
-        }
-        scm {
-          connection = 'scm:git:git://github.com/sciencesakura/dbsetup-csv.git'
-          developerConnection = 'scm:git:git://github.com/sciencesakura/dbsetup-csv.git'
-          url = 'https://github.com/sciencesakura/dbsetup-csv'
-        }
-      }
-    }
-  }
   repositories {
-    maven {
-      url 'https://oss.sonatype.org/service/local/staging/deploy/maven2'
-      credentials {
-        username project.ossrhUsername
-        password project.ossrhPassword
-      }
-    }
+    mavenCentral()
   }
 }
 
-signing {
-  sign publishing.publications.maven
-}
+subprojects {
+  apply plugin: 'java-library'
+  apply plugin: 'maven-publish'
+  apply plugin: 'signing'
 
-clean {
-  delete << javadoc.destinationDir
+  jar {
+    manifest {
+      attributes(
+        'Implementation-Title': project.name,
+        'Implementation-Vendor': project.group.split('\\.').reverse().join('.'),
+        'Implementation-Version': project.version
+      )
+    }
+    metaInf {
+      from file("$projectDir/LICENSE")
+    }
+  }
+
+  publishing {
+    publications {
+      maven(MavenPublication) {
+        from components.java
+        pom {
+          name = project.name
+          description = project.description
+          url = 'https://github.com/sciencesakura/dbsetup-csv'
+          organization {
+            name = 'sciencesakura.com'
+            url = 'https://www.sciencesakura.com/'
+          }
+          licenses {
+            license {
+              name = 'MIT License'
+              url = 'https://opensource.org/licenses/MIT'
+            }
+          }
+          developers {
+            developer {
+              name = 'sciencesakura'
+              email = 'sakurasakurascience@gmail.com'
+            }
+          }
+          scm {
+            connection = 'scm:git:git://github.com/sciencesakura/dbsetup-csv.git'
+            developerConnection = 'scm:git:git://github.com/sciencesakura/dbsetup-csv.git'
+            url = 'https://github.com/sciencesakura/dbsetup-csv'
+          }
+        }
+      }
+    }
+    repositories {
+      maven {
+        url 'https://oss.sonatype.org/service/local/staging/deploy/maven2'
+        credentials {
+          username project.ossrhUsername
+          password project.ossrhPassword
+        }
+      }
+    }
+  }
 }

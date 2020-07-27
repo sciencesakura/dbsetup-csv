@@ -1,0 +1,43 @@
+plugins {
+  id 'com.github.spotbugs' version '4.4.4'
+}
+
+dependencies {
+  api 'com.ninja-squad:DbSetup:2.1.0'
+  implementation 'org.apache.commons:commons-csv:1.8'
+  compileOnly 'org.jetbrains:annotations:19.0.0'
+
+  testImplementation 'org.flywaydb:flyway-core:6.5.2'
+  testImplementation 'org.junit.jupiter:junit-jupiter:5.6.2'
+  testImplementation 'org.assertj:assertj-db:2.0.0'
+  testRuntimeOnly 'com.h2database:h2:1.4.200'
+}
+
+java {
+  sourceCompatibility = JavaVersion.VERSION_1_8
+  targetCompatibility = JavaVersion.VERSION_1_8
+  withSourcesJar()
+  withJavadocJar()
+}
+
+test {
+  useJUnitPlatform()
+}
+
+javadoc {
+  destinationDir = file("$rootDir/docs")
+  options.noTimestamp = true
+  options.links(
+    'https://docs.oracle.com/javase/8/docs/api/',
+    'http://dbsetup.ninja-squad.com/apidoc/2.1.0/',
+    'https://javadoc.io/doc/org.jetbrains/annotations/19.0.0/'
+  )
+}
+
+spotbugs {
+  excludeFilter.set(file("$projectDir/config/spotbugs/exclude.xml"))
+}
+
+clean {
+  delete javadoc.destinationDir
+}
