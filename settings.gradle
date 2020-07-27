@@ -1,3 +1,4 @@
 rootProject.name = 'dbsetup-csv'
-include 'core'
+include 'core', 'kotlin'
 project(':core').name = 'dbsetup-csv'
+project(':kotlin').name = 'dbsetup-csv-kt'
