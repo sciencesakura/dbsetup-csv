@@ -119,6 +119,27 @@ class ImportTest {
                 .value("g").isEqualTo("G-2");
     }
 
+    @Test
+    void constants() {
+        Changes changes = new Changes(source).setStartPointNow();
+        Operation operation = csv("constants.csv")
+                .into("table_1")
+                .withDefaultValue("g", "G")
+                .withDefaultValue("i", null)
+                .build();
+        new DbSetup(destination, operation).launch();
+        changes.setEndPointNow();
+        assertThat(changes).hasNumberOfChanges(2)
+                .changeOfCreation()
+                .rowAtEndPoint()
+                .value("g").isEqualTo("G")
+                .value("i").isNull()
+                .changeOfCreation()
+                .rowAtEndPoint()
+                .value("g").isEqualTo("G")
+                .value("i").isNull();
+    }
+
     private void validateChanges(Changes changes) {
         assertThat(changes).hasNumberOfChanges(2)
                 .changeOfCreation()
@@ -184,6 +205,16 @@ class ImportTest {
             assertThatThrownBy(() -> csv("default.csv").into(table)
                     .withCharset(charset))
                     .hasMessage("charset must not be null");
+        }
+
+        @Test
+        void default_value_column_is_null() {
+            String table = "table";
+            String column = null;
+            Object value = new Object();
+            assertThatThrownBy(() -> csv("default.csv").into(table)
+                    .withDefaultValue(column, value))
+                    .hasMessage("column must not be null");
         }
 
         @Test
@@ -280,6 +311,16 @@ class ImportTest {
             Import.Builder ib = csv("default.csv").into(table);
             ib.build();
             assertThatThrownBy(() -> ib.withCharset("UTF-8"))
+                    .isInstanceOf(IllegalStateException.class)
+                    .hasMessage("this operation has been built already");
+        }
+
+        @Test
+        void default_value_after_built() {
+            String table = "table";
+            Import.Builder ib = csv("default.csv").into(table);
+            ib.build();
+            assertThatThrownBy(() -> ib.withDefaultValue("column", "value"))
                     .isInstanceOf(IllegalStateException.class)
                     .hasMessage("this operation has been built already");
         }
