@@ -7,7 +7,6 @@ dependencies {
   implementation 'org.apache.commons:commons-csv:1.8'
   compileOnly 'org.jetbrains:annotations:19.0.0'
 
-  testImplementation 'org.flywaydb:flyway-core:6.5.2'
   testImplementation 'org.junit.jupiter:junit-jupiter:5.6.2'
   testImplementation 'org.assertj:assertj-db:2.0.0'
   testRuntimeOnly 'com.h2database:h2:1.4.200'

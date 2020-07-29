@@ -101,6 +101,7 @@ public class Import implements Operation {
         Insert.Builder ib = Insert.into(builder.table);
         try (CSVParser csv = CSVParser.parse(builder.csv.location.openStream(), builder.charset, format)) {
             ib.columns(csv.getHeaderNames().toArray(EMPTY_ARRAY));
+            builder.defaultValues.forEach(ib::withDefaultValue);
             builder.valueGenerators.forEach(ib::withGeneratedValue);
             csv.forEach(row -> ib.values(toArray(row)));
         } catch (IOException e) {
@@ -154,6 +155,8 @@ public class Import implements Operation {
      * @author sciencesakura
      */
     public static class Builder {
+
+        private final Map<String, Object> defaultValues = new LinkedHashMap<>();
 
         private final Map<String, ValueGenerator<?>> valueGenerators = new LinkedHashMap<>();
 
@@ -223,6 +226,22 @@ public class Import implements Operation {
             requireNotBuilt();
             requireNonNull(charset, "charset must not be null");
             this.charset = Charset.forName(charset);
+            return this;
+        }
+
+        /**
+         * Specifies a default value of the given column.
+         *
+         * @param column the column name
+         * @param value  the default value
+         * @return the reference to this object
+         * @throws IllegalStateException if this builder has built an {@code Import} already.
+         */
+        @NotNull
+        public Builder withDefaultValue(@NotNull String column, Object value) {
+            requireNotBuilt();
+            requireNonNull(column, "column must not be null");
+            defaultValues.put(column, value);
             return this;
         }
 

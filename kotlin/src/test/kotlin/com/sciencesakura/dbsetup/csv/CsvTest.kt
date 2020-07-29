@@ -23,30 +23,26 @@
  */
 package com.sciencesakura.dbsetup.csv
 
-import com.ninja_squad.dbsetup.destination.Destination
 import com.ninja_squad.dbsetup.destination.DriverManagerDestination
 import com.ninja_squad.dbsetup.generator.ValueGenerators
 import com.ninja_squad.dbsetup_kotlin.dbSetup
 import org.assertj.db.api.Assertions.assertThat
+import org.assertj.db.type.Changes
 import org.assertj.db.type.Source
-import org.assertj.db.type.Table
-import org.assertj.db.type.Table.Order.asc
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
+private const val url = "jdbc:h2:mem:test;DB_CLOSE_DELAY=-1"
+private const val username = "sa"
+
 class CsvTest {
 
-    private val order = arrayOf(asc("a"))
+    private val destination = DriverManagerDestination(url, username, null)
 
-    lateinit var destination: Destination
-
-    lateinit var source: Source
+    private val source = Source(url, username, null)
 
     @BeforeEach
     fun setUp() {
-        val url = "jdbc:h2:mem:test;DB_CLOSE_DELAY=-1"
-        destination = DriverManagerDestination(url, "sa", null)
-        source = Source(url, "sa", null)
         dbSetup(destination) {
             sql("drop table if exists table_1")
             sql(
@@ -62,31 +58,39 @@ class CsvTest {
 
     @Test
     fun into_table() {
+        val changes = Changes(source).setStartPointNow()
         dbSetup(destination) {
             csv("into_table.csv").into("table_1")
         }.launch()
-        assertThat(Table(source, "table_1", order))
-            .row()
-            .column("a").value().isEqualTo(10)
-            .column("b").value().isEqualTo(100)
-            .row()
-            .column("a").value().isEqualTo(20)
-            .column("b").value().isEqualTo(200)
+        changes.setEndPointNow()
+        assertThat(changes).hasNumberOfChanges(2)
+            .changeOfCreation()
+            .rowAtEndPoint()
+            .value("a").isEqualTo(10)
+            .value("b").isEqualTo(100)
+            .changeOfCreation()
+            .rowAtEndPoint()
+            .value("a").isEqualTo(20)
+            .value("b").isEqualTo(200)
     }
 
     @Test
     fun into_table_configure() {
+        val changes = Changes(source).setStartPointNow()
         dbSetup(destination) {
             csv("into_table_configure.csv").into("table_1") {
                 withGeneratedValue("a", ValueGenerators.sequence())
             }
         }.launch()
-        assertThat(Table(source, "table_1", order))
-            .row()
-            .column("a").value().isEqualTo(1)
-            .column("b").value().isEqualTo(100)
-            .row()
-            .column("a").value().isEqualTo(2)
-            .column("b").value().isEqualTo(200)
+        changes.setEndPointNow()
+        assertThat(changes).hasNumberOfChanges(2)
+            .changeOfCreation()
+            .rowAtEndPoint()
+            .value("a").isEqualTo(1)
+            .value("b").isEqualTo(100)
+            .changeOfCreation()
+            .rowAtEndPoint()
+            .value("a").isEqualTo(2)
+            .value("b").isEqualTo(200)
     }
 }

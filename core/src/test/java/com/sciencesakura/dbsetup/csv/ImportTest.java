@@ -24,127 +24,155 @@
 package com.sciencesakura.dbsetup.csv;
 
 import com.ninja_squad.dbsetup.DbSetup;
-import com.ninja_squad.dbsetup.destination.DataSourceDestination;
 import com.ninja_squad.dbsetup.destination.Destination;
+import com.ninja_squad.dbsetup.destination.DriverManagerDestination;
 import com.ninja_squad.dbsetup.generator.ValueGenerator;
 import com.ninja_squad.dbsetup.generator.ValueGenerators;
 import com.ninja_squad.dbsetup.operation.Operation;
-import org.assertj.db.type.Table;
-import org.flywaydb.core.Flyway;
-import org.flywaydb.core.api.configuration.FluentConfiguration;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Nested;
+import org.assertj.db.type.Changes;
+import org.assertj.db.type.Source;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import javax.sql.DataSource;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Collection;
 
-import static com.ninja_squad.dbsetup.Operations.sequenceOf;
-import static com.ninja_squad.dbsetup.Operations.truncate;
+import static com.ninja_squad.dbsetup.Operations.sql;
 import static com.sciencesakura.dbsetup.csv.Import.csv;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.db.api.Assertions.assertThat;
-import static org.assertj.db.type.Table.Order.asc;
 
 class ImportTest {
 
-    private static final Table.Order[] ORDER_BY_PK = {asc("pk")};
+    private static final String url = "jdbc:h2:mem:test;DB_CLOSE_DELAY=-1";
 
-    private static DataSource dataSource;
+    private static final String username = "sa";
 
-    private static Destination destination;
+    private final Destination destination = new DriverManagerDestination(url, username, null);
 
-    @BeforeAll
-    static void setUpClass() {
-        String url = "jdbc:h2:mem:ImportTest;DB_CLOSE_DELAY=-1";
-        FluentConfiguration conf = Flyway.configure().dataSource(url, "sa", null);
-        conf.load().migrate();
-        dataSource = conf.getDataSource();
-        destination = DataSourceDestination.with(dataSource);
+    private final Source source = new Source(url, username, null);
+
+    @BeforeEach
+    void setUp() {
+        String[] ddl = {
+                "drop table if exists table_1 cascade",
+                "create table table_1 (" +
+                "  a   integer primary key," +
+                "  b   bigint," +
+                "  c   decimal(7, 3)," +
+                "  d   date," +
+                "  e   timestamp," +
+                "  f   char(3)," +
+                "  g   varchar(6)," +
+                "  h   boolean," +
+                "  i   varchar(6)" +
+                ")"
+        };
+        new DbSetup(destination, sql(ddl)).launch();
     }
 
     @Test
     void default_csv() {
-        Operation operation = sequenceOf(
-                truncate("table_1"),
-                csv("data/default.csv").into("table_1")
-                        .withGeneratedValue("pk", ValueGenerators.sequence())
-                        .build());
-        DbSetup dbSetup = new DbSetup(destination, operation);
-        dbSetup.launch();
-        assertThat(new Table(dataSource, "table_1", ORDER_BY_PK))
-                .row()
-                .column("pk").value().isEqualTo(1)
-                .column("a").value().isEqualTo(100)
-                .column("b").value().isEqualTo(10000000000L)
-                .column("c").value().isEqualTo(0.5)
-                .column("d").value().isEqualTo("2019-12-01")
-                .column("e").value().isEqualTo("2019-12-01T09:30:01.001000000")
-                .column("f").value().isEqualTo("AAA")
-                .column("g").value().isEqualTo("甲")
-                .column("h").value().isTrue()
-                .column("i").value().isNotNull()
-                .row()
-                .column("pk").value().isEqualTo(2)
-                .column("a").value().isEqualTo(200)
-                .column("b").value().isEqualTo(20000000000L)
-                .column("c").value().isEqualTo(0.25)
-                .column("d").value().isEqualTo("2019-12-02")
-                .column("e").value().isEqualTo("2019-12-02T09:30:02.002000000")
-                .column("f").value().isEqualTo("BBB")
-                .column("g").value().isEqualTo("乙")
-                .column("h").value().isFalse()
-                .column("i").value().isNull();
+        Changes changes = new Changes(source).setStartPointNow();
+        Operation operation = csv("default.csv")
+                .into("table_1")
+                .build();
+        new DbSetup(destination, operation).launch();
+        changes.setEndPointNow();
+        validateChanges(changes);
     }
 
     @Test
     void pgsql_tsv() {
-        Operation operation = sequenceOf(
-                truncate("table_1"),
-                csv("data/pgsql.tsv").into("table_1")
-                        .withGeneratedValue("pk", ValueGenerators.sequence())
-                        .withDelimiter('\t')
-                        .withHeader("a", "b", "c", "d", "e", "f", "g", "h", "i")
-                        .withNullAs("\\N")
-                        .build());
-        DbSetup dbSetup = new DbSetup(destination, operation);
-        dbSetup.launch();
-        assertThat(new Table(dataSource, "table_1", ORDER_BY_PK))
-                .row()
-                .column("pk").value().isEqualTo(1)
-                .column("a").value().isEqualTo(100)
-                .column("b").value().isEqualTo(10000000000L)
-                .column("c").value().isEqualTo(0.5)
-                .column("d").value().isEqualTo("2019-12-01")
-                .column("e").value().isEqualTo("2019-12-01T09:30:01.001000000")
-                .column("f").value().isEqualTo("AAA")
-                .column("g").value().isEqualTo("甲")
-                .column("h").value().isTrue()
-                .column("i").value().isNotNull()
-                .row()
-                .column("pk").value().isEqualTo(2)
-                .column("a").value().isEqualTo(200)
-                .column("b").value().isEqualTo(20000000000L)
-                .column("c").value().isEqualTo(0.25)
-                .column("d").value().isEqualTo("2019-12-02")
-                .column("e").value().isEqualTo("2019-12-02T09:30:02.002000000")
-                .column("f").value().isEqualTo("BBB")
-                .column("g").value().isEqualTo("乙")
-                .column("h").value().isFalse()
-                .column("i").value().isNull();
+        Changes changes = new Changes(source).setStartPointNow();
+        Operation operation = csv("pgsql.tsv")
+                .into("table_1")
+                .withDelimiter('\t')
+                .withHeader("a", "b", "c", "d", "e", "f", "g", "h", "i")
+                .withNullAs("\\N")
+                .build();
+        new DbSetup(destination, operation).launch();
+        changes.setEndPointNow();
+        validateChanges(changes);
     }
 
-    @Nested
-    class IllegalArgument {
+    @Test
+    void generators() {
+        Changes changes = new Changes(source).setStartPointNow();
+        Operation operation = csv("generators.csv")
+                .into("table_1")
+                .withGeneratedValue("a", ValueGenerators.sequence())
+                .withGeneratedValue("g", ValueGenerators.stringSequence("G-"))
+                .build();
+        new DbSetup(destination, operation).launch();
+        changes.setEndPointNow();
+        assertThat(changes).hasNumberOfChanges(2)
+                .changeOfCreation()
+                .rowAtEndPoint()
+                .value("a").isEqualTo(1)
+                .value("g").isEqualTo("G-1")
+                .changeOfCreation()
+                .rowAtEndPoint()
+                .value("a").isEqualTo(2)
+                .value("g").isEqualTo("G-2");
+    }
+
+    @Test
+    void constants() {
+        Changes changes = new Changes(source).setStartPointNow();
+        Operation operation = csv("constants.csv")
+                .into("table_1")
+                .withDefaultValue("g", "G")
+                .withDefaultValue("i", null)
+                .build();
+        new DbSetup(destination, operation).launch();
+        changes.setEndPointNow();
+        assertThat(changes).hasNumberOfChanges(2)
+                .changeOfCreation()
+                .rowAtEndPoint()
+                .value("g").isEqualTo("G")
+                .value("i").isNull()
+                .changeOfCreation()
+                .rowAtEndPoint()
+                .value("g").isEqualTo("G")
+                .value("i").isNull();
+    }
+
+    private void validateChanges(Changes changes) {
+        assertThat(changes).hasNumberOfChanges(2)
+                .changeOfCreation()
+                .rowAtEndPoint()
+                .value("a").isEqualTo(100)
+                .value("b").isEqualTo(10000000000L)
+                .value("c").isEqualTo(0.5)
+                .value("d").isEqualTo("2019-12-01")
+                .value("e").isEqualTo("2019-12-01T09:30:01.001000000")
+                .value("f").isEqualTo("AAA")
+                .value("g").isEqualTo("甲")
+                .value("h").isTrue()
+                .value("i").isNotNull()
+                .changeOfCreation()
+                .rowAtEndPoint()
+                .value("a").isEqualTo(200)
+                .value("b").isEqualTo(20000000000L)
+                .value("c").isEqualTo(0.25)
+                .value("d").isEqualTo("2019-12-02")
+                .value("e").isEqualTo("2019-12-02T09:30:02.002000000")
+                .value("f").isEqualTo("BBB")
+                .value("g").isEqualTo("乙")
+                .value("h").isFalse()
+                .value("i").isNull();
+    }
+
+    static class IllegalArgument {
 
         @Test
         void file_not_found() {
-            assertThatThrownBy(() -> csv("data/file_not_found"))
+            assertThatThrownBy(() -> csv("file_not_found"))
                     .isInstanceOf(IllegalArgumentException.class)
-                    .hasMessage("data/file_not_found not found");
+                    .hasMessage("file_not_found not found");
         }
 
         @Test
@@ -157,7 +185,7 @@ class ImportTest {
         @Test
         void table_is_null() {
             String table = null;
-            assertThatThrownBy(() -> csv("data/default.csv").into(table))
+            assertThatThrownBy(() -> csv("default.csv").into(table))
                     .hasMessage("table must not be null");
         }
 
@@ -165,7 +193,7 @@ class ImportTest {
         void charset_charset_is_null() {
             String table = "table";
             Charset charset = null;
-            assertThatThrownBy(() -> csv("data/default.csv").into(table)
+            assertThatThrownBy(() -> csv("default.csv").into(table)
                     .withCharset(charset))
                     .hasMessage("charset must not be null");
         }
@@ -174,9 +202,19 @@ class ImportTest {
         void string_charset_is_null() {
             String table = "table";
             String charset = null;
-            assertThatThrownBy(() -> csv("data/default.csv").into(table)
+            assertThatThrownBy(() -> csv("default.csv").into(table)
                     .withCharset(charset))
                     .hasMessage("charset must not be null");
+        }
+
+        @Test
+        void default_value_column_is_null() {
+            String table = "table";
+            String column = null;
+            Object value = new Object();
+            assertThatThrownBy(() -> csv("default.csv").into(table)
+                    .withDefaultValue(column, value))
+                    .hasMessage("column must not be null");
         }
 
         @Test
@@ -184,7 +222,7 @@ class ImportTest {
             String table = "table";
             String column = null;
             ValueGenerator<?> valueGenerator = ValueGenerators.sequence();
-            assertThatThrownBy(() -> csv("data/default.csv").into(table)
+            assertThatThrownBy(() -> csv("default.csv").into(table)
                     .withGeneratedValue(column, valueGenerator))
                     .hasMessage("column must not be null");
         }
@@ -194,7 +232,7 @@ class ImportTest {
             String table = "table";
             String column = "column";
             ValueGenerator<?> valueGenerator = null;
-            assertThatThrownBy(() -> csv("data/default.csv").into(table)
+            assertThatThrownBy(() -> csv("default.csv").into(table)
                     .withGeneratedValue(column, valueGenerator))
                     .hasMessage("valueGenerator must not be null");
         }
@@ -203,7 +241,7 @@ class ImportTest {
         void collection_header_is_null() {
             String table = "table";
             Collection<String> headers = null;
-            assertThatThrownBy(() -> csv("data/default.csv").into(table)
+            assertThatThrownBy(() -> csv("default.csv").into(table)
                     .withHeader(headers))
                     .hasMessage("headers must not be null");
         }
@@ -212,7 +250,7 @@ class ImportTest {
         void collection_header_contains_null() {
             String table = "table";
             Collection<String> headers = Arrays.asList("a", null);
-            assertThatThrownBy(() -> csv("data/default.csv").into(table)
+            assertThatThrownBy(() -> csv("default.csv").into(table)
                     .withHeader(headers))
                     .hasMessage("headers must not contain null");
         }
@@ -221,7 +259,7 @@ class ImportTest {
         void array_header_is_null() {
             String table = "table";
             String[] headers = null;
-            assertThatThrownBy(() -> csv("data/default.csv").into(table)
+            assertThatThrownBy(() -> csv("default.csv").into(table)
                     .withHeader(headers))
                     .hasMessage("headers must not be null");
         }
@@ -230,7 +268,7 @@ class ImportTest {
         void array_header_contains_null() {
             String table = "table";
             String[] headers = {"a", null};
-            assertThatThrownBy(() -> csv("data/default.csv").into(table)
+            assertThatThrownBy(() -> csv("default.csv").into(table)
                     .withHeader(headers))
                     .hasMessage("headers must not contain null");
         }
@@ -239,19 +277,18 @@ class ImportTest {
         void nullString_is_null() {
             String table = "table";
             String nullString = null;
-            assertThatThrownBy(() -> csv("data/default.csv").into(table)
+            assertThatThrownBy(() -> csv("default.csv").into(table)
                     .withNullAs(nullString))
                     .hasMessage("nullString must not be null");
         }
     }
 
-    @Nested
-    class IllegalState {
+    static class IllegalState {
 
         @Test
         void build_after_built() {
             String table = "table";
-            Import.Builder ib = csv("data/default.csv").into(table);
+            Import.Builder ib = csv("default.csv").into(table);
             ib.build();
             assertThatThrownBy(ib::build)
                     .isInstanceOf(IllegalStateException.class)
@@ -261,7 +298,7 @@ class ImportTest {
         @Test
         void charset_charset_after_built() {
             String table = "table";
-            Import.Builder ib = csv("data/default.csv").into(table);
+            Import.Builder ib = csv("default.csv").into(table);
             ib.build();
             assertThatThrownBy(() -> ib.withCharset(StandardCharsets.UTF_8))
                     .isInstanceOf(IllegalStateException.class)
@@ -271,7 +308,7 @@ class ImportTest {
         @Test
         void string_charset_after_built() {
             String table = "table";
-            Import.Builder ib = csv("data/default.csv").into(table);
+            Import.Builder ib = csv("default.csv").into(table);
             ib.build();
             assertThatThrownBy(() -> ib.withCharset("UTF-8"))
                     .isInstanceOf(IllegalStateException.class)
@@ -279,9 +316,19 @@ class ImportTest {
         }
 
         @Test
+        void default_value_after_built() {
+            String table = "table";
+            Import.Builder ib = csv("default.csv").into(table);
+            ib.build();
+            assertThatThrownBy(() -> ib.withDefaultValue("column", "value"))
+                    .isInstanceOf(IllegalStateException.class)
+                    .hasMessage("this operation has been built already");
+        }
+
+        @Test
         void delimiter_after_built() {
             String table = "table";
-            Import.Builder ib = csv("data/default.csv").into(table);
+            Import.Builder ib = csv("default.csv").into(table);
             ib.build();
             assertThatThrownBy(() -> ib.withDelimiter(','))
                     .isInstanceOf(IllegalStateException.class)
@@ -291,7 +338,7 @@ class ImportTest {
         @Test
         void value_generator_after_built() {
             String table = "table";
-            Import.Builder ib = csv("data/default.csv").into(table);
+            Import.Builder ib = csv("default.csv").into(table);
             ib.build();
             assertThatThrownBy(() -> ib.withGeneratedValue("column", ValueGenerators.sequence()))
                     .isInstanceOf(IllegalStateException.class)
@@ -301,7 +348,7 @@ class ImportTest {
         @Test
         void collection_headers_after_built() {
             String table = "table";
-            Import.Builder ib = csv("data/default.csv").into(table);
+            Import.Builder ib = csv("default.csv").into(table);
             ib.build();
             assertThatThrownBy(() -> ib.withHeader(Arrays.asList("a", "b")))
                     .isInstanceOf(IllegalStateException.class)
@@ -311,7 +358,7 @@ class ImportTest {
         @Test
         void array_headers_after_built() {
             String table = "table";
-            Import.Builder ib = csv("data/default.csv").into(table);
+            Import.Builder ib = csv("default.csv").into(table);
             ib.build();
             assertThatThrownBy(() -> ib.withHeader("a", "b"))
                     .isInstanceOf(IllegalStateException.class)
@@ -321,7 +368,7 @@ class ImportTest {
         @Test
         void nullString_after_built() {
             String table = "table";
-            Import.Builder ib = csv("data/default.csv").into(table);
+            Import.Builder ib = csv("default.csv").into(table);
             ib.build();
             assertThatThrownBy(() -> ib.withNullAs("null"))
                     .isInstanceOf(IllegalStateException.class)
@@ -331,7 +378,7 @@ class ImportTest {
         @Test
         void quote_after_built() {
             String table = "table";
-            Import.Builder ib = csv("data/default.csv").into(table);
+            Import.Builder ib = csv("default.csv").into(table);
             ib.build();
             assertThatThrownBy(() -> ib.withQuote('"'))
                     .isInstanceOf(IllegalStateException.class)
