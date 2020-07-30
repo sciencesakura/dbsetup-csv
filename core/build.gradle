@@ -33,10 +33,6 @@ javadoc {
   )
 }
 
-spotbugs {
-  excludeFilter.set(file("$projectDir/config/spotbugs/exclude.xml"))
-}
-
 clean {
   delete javadoc.destinationDir
 }
