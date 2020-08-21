@@ -23,6 +23,19 @@ test {
   useJUnitPlatform()
 }
 
+jar {
+  manifest {
+    attributes(
+      'Export-Package': 'com.sciencesakura.dbsetup.csv',
+      'Import-Package': 'com.ninja_squad.dbsetup,'
+        + 'com.ninja_squad.dbsetup.bind,'
+        + 'com.ninja_squad.dbsetup.generator,'
+        + 'com.ninja_squad.dbsetup.operation,'
+        + 'org.apache.commons.csv'
+    )
+  }
+}
+
 javadoc {
   destinationDir = file("$rootDir/docs/core")
   options.noTimestamp = true

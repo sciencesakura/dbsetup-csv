@@ -24,6 +24,18 @@ test {
   useJUnitPlatform()
 }
 
+jar {
+  manifest {
+    attributes(
+      'Export-Package': 'com.sciencesakura.dbsetup.csv',
+      'Import-Package': 'com.ninja_squad.dbsetup_kotlin,'
+        + 'com.sciencesakura.dbsetup.csv'
+        + ";bundle-symbolic-name=\"${project.group}.${project(':dbsetup-csv').name}\""
+        + ";bundle-version=\"${project.version}\""
+    )
+  }
+}
+
 dokka {
   outputDirectory = "$rootDir/docs/kotlin"
   configuration {
