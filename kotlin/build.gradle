@@ -25,7 +25,10 @@ test {
 }
 
 dokka {
-  outputDirectory = file("$rootDir/docs/kt")
+  outputDirectory = "$rootDir/docs/kotlin"
+  configuration {
+    jdkVersion = 8
+  }
 }
 
 clean {
@@ -33,3 +36,4 @@ clean {
 }
 
 assemble.dependsOn(kotlinSourcesJar)
+build.dependsOn(dokka)

@@ -230,7 +230,7 @@ public class Import implements Operation {
         }
 
         /**
-         * Specifies a default value of the given column.
+         * Specifies a default value for the given column.
          *
          * @param column the column name
          * @param value  the default value
@@ -263,7 +263,7 @@ public class Import implements Operation {
         }
 
         /**
-         * Add a value generator for the specified column.
+         * Specifies a value generator for the given column.
          *
          * @param column         the column name
          * @param valueGenerator the generator
