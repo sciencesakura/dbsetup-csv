@@ -43,6 +43,14 @@ dokka {
   }
 }
 
+publishing {
+  publications {
+    maven(MavenPublication) {
+      artifact kotlinSourcesJar
+    }
+  }
+}
+
 clean {
   delete dokka.outputDirectory
 }
