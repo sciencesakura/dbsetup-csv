@@ -120,18 +120,6 @@
  Operation operation = csv("testdata.csv").into("tablename").build();
  DbSetup dbSetup = new DbSetup(destination, operation);
  dbSetup.launch();
- </code></pre>
- <p>
- By default, the source file is treated as an UTF-8-encoded and comma-delimited file. And the
- first line of the source file is used as a header. Of course you can customize it:
- </p>
- <pre><code>
- // import an ms932-encoded, tab-delimited and no-header file
- csv("testdata.tsv").into("tablename")
-     .withCharset("ms932")
-     .withDelimiter('\t')
-     .withHeader("column_1", "column_2", "column_3")
-     .build();
  </code></pre></div>
 </div>
 <!-- ======= START OF BOTTOM NAVBAR ====== -->
