@@ -8,14 +8,17 @@ CSV/TSVファイルからデータ取り込みができる[DbSetup](http://dbset
 
 ## Requirement
 
-* Java 8以降
+* Java 8+
 
 ## Installation
 
 Gradle:
 
 ```groovy
-testImplementation 'com.sciencesakura:dbsetup-csv:1.0.1'
+testImplementation 'com.sciencesakura:dbsetup-csv:1.1.0'
+
+// optional - Kotlin Extensions
+testImplementation 'com.sciencesakura:dbsetup-csv-kt:1.1.0'
 ```
 
 Maven:
@@ -24,38 +27,41 @@ Maven:
 <dependency>
   <groupId>com.sciencesakura</groupId>
   <artifactId>dbsetup-csv</artifactId>
-  <version>1.0.1</version>
+  <version>1.1.0</version>
+  <scope>test</scope>
+</dependency>
+
+<!-- optional - Kotlin Extensions -->
+<dependency>
+  <groupId>com.sciencesakura</groupId>
+  <artifactId>dbsetup-csv-kt</artifactId>
+  <version>1.1.0</version>
   <scope>test</scope>
 </dependency>
 ```
 
 ## Usage
 
+Java:
+
 ```java
 import static com.sciencesakura.dbsetup.csv.Import.csv;
 
 // `testdata.csv`はクラスパス上にある必要があります
-Operation operation = csv("testdata.csv").into("tablename").build()
+Operation operation = csv("testdata.csv").into("tablename").build();
 DbSetup dbSetup = new DbSetup(destination, operation);
 dbSetup.launch();
 ```
 
-デフォルトでソース・ファイルはUTF-8でエンコードされたカンマ区切りのファイルとして扱われます. またソース・ファイルの先頭行はヘッダと看做されます. これらは変更可能です:
+Kotlin:
 
-```java
-// ms932エンコード, タブ区切り, ヘッダなしファイルを取り込む
-csv("testdata.tsv").into("tablename")
-    .withCharset("ms932")
-    .withDelimiter('\t')
-    .withHeader("column_1", "column_2", "column_3")
-    .build()
+```kotlin
+dbSetup(destination) {
+    csv("testdata.csv").into("tablename")
+}.launch()
 ```
 
 詳細は[APIリファレンス](https://sciencesakura.github.io/dbsetup-csv/)を参照して下さい.
-
-## Recommendation
-
-この拡張機能を利用するのは, 取り込み先テーブルの列数が多すぎて[Insert.Builder](http://dbsetup.ninja-squad.com/apidoc/2.1.0/com/ninja_squad/dbsetup/operation/Insert.Builder.html)を使用したコードの可読性が悪くなってしまう場合にのみにすることをお薦めします.
 
 ## Prefer Excel ?
 

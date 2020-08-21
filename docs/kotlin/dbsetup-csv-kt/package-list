@@ -1,0 +1,4 @@
+$dokka.format:html
+$dokka.linkExtension:html
+$dokka.location:com.sciencesakura.dbsetup.csv$csv(com.ninja_squad.dbsetup_kotlin.DbSetupBuilder, kotlin.String)com.sciencesakura.dbsetup.csv/com.ninja_squad.dbsetup_kotlin.-db-setup-builder/csv.html
+com.sciencesakura.dbsetup.csv
