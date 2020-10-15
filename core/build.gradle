@@ -1,5 +1,5 @@
 plugins {
-  id 'com.github.spotbugs' version '4.4.4'
+  id 'com.github.spotbugs' version '4.5.1'
 }
 
 dependencies {
@@ -17,6 +17,10 @@ java {
   targetCompatibility = JavaVersion.VERSION_1_8
   withSourcesJar()
   withJavadocJar()
+}
+
+spotbugs {
+  excludeFilter.set(file("$projectDir/config/spotbugs/exclude.xml"))
 }
 
 test {
