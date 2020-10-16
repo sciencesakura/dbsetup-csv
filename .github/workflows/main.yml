@@ -25,4 +25,4 @@ jobs:
       env:
         ORG_GRADLE_PROJECT_ossrhUsername: xxx
         ORG_GRADLE_PROJECT_ossrhPassword: xxx
-      run: ./gradlew build
+      run: ./gradlew check
