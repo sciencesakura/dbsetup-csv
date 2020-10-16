@@ -56,6 +56,8 @@ dbSetup.launch();
 Kotlin:
 
 ```kotlin
+import com.sciencesakura.dbsetup.csv.csv
+
 dbSetup(destination) {
     csv("testdata.csv").into("tablename")
 }.launch()
