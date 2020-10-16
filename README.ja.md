@@ -4,7 +4,7 @@
 
 CSV/TSVファイルからデータ取り込みができる[DbSetup](http://dbsetup.ninja-squad.com/)拡張機能です.
 
-![](https://github.com/sciencesakura/dbsetup-csv/workflows/build/badge.svg)
+![](https://github.com/sciencesakura/dbsetup-csv/workflows/build/badge.svg) [![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.sciencesakura/dbsetup-csv/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.sciencesakura/dbsetup-csv)
 
 ## Requirement
 
