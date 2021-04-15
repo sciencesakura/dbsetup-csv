@@ -34,33 +34,32 @@ import org.junit.jupiter.api.Test
 
 private const val url = "jdbc:h2:mem:test;DB_CLOSE_DELAY=-1"
 private const val username = "sa"
+private val source = Source(url, username, null)
+private val destination = DriverManagerDestination(url, username, null)
+private val setUpQueries = arrayOf(
+    "drop table if exists kt_table_1 cascade",
+    """
+    create table kt_table_1 (
+      a integer primary key,
+      b integer
+    )
+    """
+)
 
 class CsvTest {
-
-    private val destination = DriverManagerDestination(url, username, null)
-
-    private val source = Source(url, username, null)
 
     @BeforeEach
     fun setUp() {
         dbSetup(destination) {
-            sql("drop table if exists table_1")
-            sql(
-                """
-                create table table_1 (
-                  a integer primary key,
-                  b integer
-                )
-                """
-            )
+            sql(*setUpQueries)
         }.launch()
     }
 
     @Test
-    fun into_table() {
+    fun import_csv() {
         val changes = Changes(source).setStartPointNow()
         dbSetup(destination) {
-            csv("into_table.csv").into("table_1")
+            csv("kt_table_1.csv")
         }.launch()
         changes.setEndPointNow()
         assertThat(changes).hasNumberOfChanges(2)
@@ -75,10 +74,11 @@ class CsvTest {
     }
 
     @Test
-    fun into_table_configure() {
+    fun import_csv_with_configure() {
         val changes = Changes(source).setStartPointNow()
         dbSetup(destination) {
-            csv("into_table_configure.csv").into("table_1") {
+            csv("kt_table_1_generators.csv") {
+                into("kt_table_1")
                 withGeneratedValue("a", ValueGenerators.sequence())
             }
         }.launch()

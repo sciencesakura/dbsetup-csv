@@ -49,120 +49,139 @@ class ImportTest {
 
     private static final String username = "sa";
 
-    private final Destination destination = new DriverManagerDestination(url, username, null);
+    private static final Source source = new Source(url, username, null);
 
-    private final Source source = new Source(url, username, null);
+    private static final Destination destination = new DriverManagerDestination(url, username, null);
+
+    private static final Operation setUpQueries = sql(
+        "drop table if exists table_1 cascade",
+        "create table table_1 (" +
+            "  a   integer primary key," +
+            "  b   bigint," +
+            "  c   decimal(7, 3)," +
+            "  d   date," +
+            "  e   timestamp," +
+            "  f   char(3)," +
+            "  g   varchar(6)," +
+            "  h   boolean," +
+            "  i   varchar(6)" +
+            ")"
+    );
 
     @BeforeEach
     void setUp() {
-        String[] ddl = {
-                "drop table if exists table_1 cascade",
-                "create table table_1 (" +
-                "  a   integer primary key," +
-                "  b   bigint," +
-                "  c   decimal(7, 3)," +
-                "  d   date," +
-                "  e   timestamp," +
-                "  f   char(3)," +
-                "  g   varchar(6)," +
-                "  h   boolean," +
-                "  i   varchar(6)" +
-                ")"
-        };
-        new DbSetup(destination, sql(ddl)).launch();
+        new DbSetup(destination, setUpQueries).launch();
     }
 
     @Test
-    void default_csv() {
+    void import_csv_default() {
         Changes changes = new Changes(source).setStartPointNow();
-        Operation operation = csv("default.csv")
-                .into("table_1")
-                .build();
+        Operation operation = csv("table_1.csv")
+            .into("table_1")
+            .build();
         new DbSetup(destination, operation).launch();
         changes.setEndPointNow();
         validateChanges(changes);
     }
 
     @Test
-    void pgsql_tsv() {
+    void import_tsv_pgsql_style() {
         Changes changes = new Changes(source).setStartPointNow();
-        Operation operation = csv("pgsql.tsv")
-                .into("table_1")
-                .withDelimiter('\t')
-                .withHeader("a", "b", "c", "d", "e", "f", "g", "h", "i")
-                .withNullAs("\\N")
-                .build();
+        Operation operation = csv("table_1_pqsql.tsv")
+            .into("table_1")
+            .withDelimiter('\t')
+            .withHeader("a", "b", "c", "d", "e", "f", "g", "h", "i")
+            .withNullAs("\\N")
+            .build();
         new DbSetup(destination, operation).launch();
         changes.setEndPointNow();
         validateChanges(changes);
     }
 
     @Test
-    void generators() {
+    void import_without_into() {
         Changes changes = new Changes(source).setStartPointNow();
-        Operation operation = csv("generators.csv")
-                .into("table_1")
-                .withGeneratedValue("a", ValueGenerators.sequence())
-                .withGeneratedValue("g", ValueGenerators.stringSequence("G-"))
-                .build();
+        Operation operation = csv("table_1.csv").build();
         new DbSetup(destination, operation).launch();
         changes.setEndPointNow();
-        assertThat(changes).hasNumberOfChanges(2)
-                .changeOfCreation()
-                .rowAtEndPoint()
-                .value("a").isEqualTo(1)
-                .value("g").isEqualTo("G-1")
-                .changeOfCreation()
-                .rowAtEndPoint()
-                .value("a").isEqualTo(2)
-                .value("g").isEqualTo("G-2");
+        validateChanges(changes);
     }
 
     @Test
-    void constants() {
+    void import_without_into__no_extension() {
         Changes changes = new Changes(source).setStartPointNow();
-        Operation operation = csv("constants.csv")
-                .into("table_1")
-                .withDefaultValue("g", "G")
-                .withDefaultValue("i", null)
-                .build();
+        Operation operation = csv("table_1").build();
+        new DbSetup(destination, operation).launch();
+        changes.setEndPointNow();
+        validateChanges(changes);
+    }
+
+    @Test
+    void use_generators() {
+        Changes changes = new Changes(source).setStartPointNow();
+        Operation operation = csv("table_1_generators.csv")
+            .into("table_1")
+            .withGeneratedValue("a", ValueGenerators.sequence())
+            .withGeneratedValue("g", ValueGenerators.stringSequence("G-"))
+            .build();
         new DbSetup(destination, operation).launch();
         changes.setEndPointNow();
         assertThat(changes).hasNumberOfChanges(2)
-                .changeOfCreation()
-                .rowAtEndPoint()
-                .value("g").isEqualTo("G")
-                .value("i").isNull()
-                .changeOfCreation()
-                .rowAtEndPoint()
-                .value("g").isEqualTo("G")
-                .value("i").isNull();
+            .changeOfCreation()
+            .rowAtEndPoint()
+            .value("a").isEqualTo(1)
+            .value("g").isEqualTo("G-1")
+            .changeOfCreation()
+            .rowAtEndPoint()
+            .value("a").isEqualTo(2)
+            .value("g").isEqualTo("G-2");
     }
 
-    private void validateChanges(Changes changes) {
+    @Test
+    void use_constants() {
+        Changes changes = new Changes(source).setStartPointNow();
+        Operation operation = csv("table_1_constants.csv")
+            .into("table_1")
+            .withDefaultValue("g", "G")
+            .withDefaultValue("i", null)
+            .build();
+        new DbSetup(destination, operation).launch();
+        changes.setEndPointNow();
         assertThat(changes).hasNumberOfChanges(2)
-                .changeOfCreation()
-                .rowAtEndPoint()
-                .value("a").isEqualTo(100)
-                .value("b").isEqualTo(10000000000L)
-                .value("c").isEqualTo(0.5)
-                .value("d").isEqualTo("2019-12-01")
-                .value("e").isEqualTo("2019-12-01T09:30:01.001000000")
-                .value("f").isEqualTo("AAA")
-                .value("g").isEqualTo("甲")
-                .value("h").isTrue()
-                .value("i").isNotNull()
-                .changeOfCreation()
-                .rowAtEndPoint()
-                .value("a").isEqualTo(200)
-                .value("b").isEqualTo(20000000000L)
-                .value("c").isEqualTo(0.25)
-                .value("d").isEqualTo("2019-12-02")
-                .value("e").isEqualTo("2019-12-02T09:30:02.002000000")
-                .value("f").isEqualTo("BBB")
-                .value("g").isEqualTo("乙")
-                .value("h").isFalse()
-                .value("i").isNull();
+            .changeOfCreation()
+            .rowAtEndPoint()
+            .value("g").isEqualTo("G")
+            .value("i").isNull()
+            .changeOfCreation()
+            .rowAtEndPoint()
+            .value("g").isEqualTo("G")
+            .value("i").isNull();
+    }
+
+    private static void validateChanges(Changes changes) {
+        assertThat(changes).hasNumberOfChanges(2)
+            .changeOfCreation()
+            .rowAtEndPoint()
+            .value("a").isEqualTo(100)
+            .value("b").isEqualTo(10000000000L)
+            .value("c").isEqualTo(0.5)
+            .value("d").isEqualTo("2019-12-01")
+            .value("e").isEqualTo("2019-12-01T09:30:01.001000000")
+            .value("f").isEqualTo("AAA")
+            .value("g").isEqualTo("甲")
+            .value("h").isTrue()
+            .value("i").isNotNull()
+            .changeOfCreation()
+            .rowAtEndPoint()
+            .value("a").isEqualTo(200)
+            .value("b").isEqualTo(20000000000L)
+            .value("c").isEqualTo(0.25)
+            .value("d").isEqualTo("2019-12-02")
+            .value("e").isEqualTo("2019-12-02T09:30:02.002000000")
+            .value("f").isEqualTo("BBB")
+            .value("g").isEqualTo("乙")
+            .value("h").isFalse()
+            .value("i").isNull();
     }
 
     static class IllegalArgument {
@@ -170,115 +189,105 @@ class ImportTest {
         @Test
         void file_not_found() {
             assertThatThrownBy(() -> csv("file_not_found"))
-                    .isInstanceOf(IllegalArgumentException.class)
-                    .hasMessage("file_not_found not found");
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("file_not_found not found");
         }
 
         @Test
         void location_is_null() {
             String location = null;
             assertThatThrownBy(() -> csv(location))
-                    .hasMessage("location must not be null");
+                .hasMessage("location must not be null");
         }
 
         @Test
         void table_is_null() {
             String table = null;
-            assertThatThrownBy(() -> csv("default.csv").into(table))
-                    .hasMessage("table must not be null");
+            assertThatThrownBy(() -> csv("table_1.csv").into(table))
+                .hasMessage("table must not be null");
         }
 
         @Test
         void charset_charset_is_null() {
-            String table = "table";
             Charset charset = null;
-            assertThatThrownBy(() -> csv("default.csv").into(table)
-                    .withCharset(charset))
-                    .hasMessage("charset must not be null");
+            assertThatThrownBy(() -> csv("table_1.csv")
+                .withCharset(charset))
+                .hasMessage("charset must not be null");
         }
 
         @Test
         void string_charset_is_null() {
-            String table = "table";
             String charset = null;
-            assertThatThrownBy(() -> csv("default.csv").into(table)
-                    .withCharset(charset))
-                    .hasMessage("charset must not be null");
+            assertThatThrownBy(() -> csv("table_1.csv")
+                .withCharset(charset))
+                .hasMessage("charset must not be null");
         }
 
         @Test
         void default_value_column_is_null() {
-            String table = "table";
             String column = null;
             Object value = new Object();
-            assertThatThrownBy(() -> csv("default.csv").into(table)
-                    .withDefaultValue(column, value))
-                    .hasMessage("column must not be null");
+            assertThatThrownBy(() -> csv("table_1.csv")
+                .withDefaultValue(column, value))
+                .hasMessage("column must not be null");
         }
 
         @Test
         void value_generator_column_is_null() {
-            String table = "table";
             String column = null;
             ValueGenerator<?> valueGenerator = ValueGenerators.sequence();
-            assertThatThrownBy(() -> csv("default.csv").into(table)
-                    .withGeneratedValue(column, valueGenerator))
-                    .hasMessage("column must not be null");
+            assertThatThrownBy(() -> csv("table_1.csv")
+                .withGeneratedValue(column, valueGenerator))
+                .hasMessage("column must not be null");
         }
 
         @Test
         void value_generator_generator_is_null() {
-            String table = "table";
             String column = "column";
             ValueGenerator<?> valueGenerator = null;
-            assertThatThrownBy(() -> csv("default.csv").into(table)
-                    .withGeneratedValue(column, valueGenerator))
-                    .hasMessage("valueGenerator must not be null");
+            assertThatThrownBy(() -> csv("table_1.csv")
+                .withGeneratedValue(column, valueGenerator))
+                .hasMessage("valueGenerator must not be null");
         }
 
         @Test
         void collection_header_is_null() {
-            String table = "table";
             Collection<String> headers = null;
-            assertThatThrownBy(() -> csv("default.csv").into(table)
-                    .withHeader(headers))
-                    .hasMessage("headers must not be null");
+            assertThatThrownBy(() -> csv("table_1.csv")
+                .withHeader(headers))
+                .hasMessage("headers must not be null");
         }
 
         @Test
         void collection_header_contains_null() {
-            String table = "table";
             Collection<String> headers = Arrays.asList("a", null);
-            assertThatThrownBy(() -> csv("default.csv").into(table)
-                    .withHeader(headers))
-                    .hasMessage("headers must not contain null");
+            assertThatThrownBy(() -> csv("table_1.csv")
+                .withHeader(headers))
+                .hasMessage("headers must not contain null");
         }
 
         @Test
         void array_header_is_null() {
-            String table = "table";
             String[] headers = null;
-            assertThatThrownBy(() -> csv("default.csv").into(table)
-                    .withHeader(headers))
-                    .hasMessage("headers must not be null");
+            assertThatThrownBy(() -> csv("table_1.csv")
+                .withHeader(headers))
+                .hasMessage("headers must not be null");
         }
 
         @Test
         void array_header_contains_null() {
-            String table = "table";
             String[] headers = {"a", null};
-            assertThatThrownBy(() -> csv("default.csv").into(table)
-                    .withHeader(headers))
-                    .hasMessage("headers must not contain null");
+            assertThatThrownBy(() -> csv("table_1.csv")
+                .withHeader(headers))
+                .hasMessage("headers must not contain null");
         }
 
         @Test
         void nullString_is_null() {
-            String table = "table";
             String nullString = null;
-            assertThatThrownBy(() -> csv("default.csv").into(table)
-                    .withNullAs(nullString))
-                    .hasMessage("nullString must not be null");
+            assertThatThrownBy(() -> csv("table_1.csv")
+                .withNullAs(nullString))
+                .hasMessage("nullString must not be null");
         }
     }
 }

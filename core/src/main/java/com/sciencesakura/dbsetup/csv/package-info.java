@@ -23,16 +23,5 @@
  */
 /**
  * A package containing classes to import data from CSV/TSV files.
- * <p>
- * Usage:
- * </p>
- * <pre><code>
- * import static com.sciencesakura.dbsetup.csv.Import.csv;
- *
- * // `testdata.csv` must be in classpath.
- * Operation operation = csv("testdata.csv").into("tablename").build();
- * DbSetup dbSetup = new DbSetup(destination, operation);
- * dbSetup.launch();
- * </code></pre>
  */
 package com.sciencesakura.dbsetup.csv;
