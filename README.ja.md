@@ -6,7 +6,7 @@ CSV/TSVファイルからデータ取り込みができる[DbSetup](http://dbset
 
 ![](https://github.com/sciencesakura/dbsetup-csv/workflows/build/badge.svg) [![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.sciencesakura/dbsetup-csv/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.sciencesakura/dbsetup-csv)
 
-## Requirement
+## Requirements
 
 * Java 8+
 
@@ -15,10 +15,10 @@ CSV/TSVファイルからデータ取り込みができる[DbSetup](http://dbset
 Gradle:
 
 ```groovy
-testImplementation 'com.sciencesakura:dbsetup-csv:1.1.0'
+testImplementation 'com.sciencesakura:dbsetup-csv:2.0.0'
 
 // optional - Kotlin Extensions
-testImplementation 'com.sciencesakura:dbsetup-csv-kt:1.1.0'
+testImplementation 'com.sciencesakura:dbsetup-csv-kt:2.0.0'
 ```
 
 Maven:
@@ -27,7 +27,7 @@ Maven:
 <dependency>
   <groupId>com.sciencesakura</groupId>
   <artifactId>dbsetup-csv</artifactId>
-  <version>1.1.0</version>
+  <version>2.0.0</version>
   <scope>test</scope>
 </dependency>
 
@@ -35,7 +35,7 @@ Maven:
 <dependency>
   <groupId>com.sciencesakura</groupId>
   <artifactId>dbsetup-csv-kt</artifactId>
-  <version>1.1.0</version>
+  <version>2.0.0</version>
   <scope>test</scope>
 </dependency>
 ```
@@ -48,7 +48,7 @@ Java:
 import static com.sciencesakura.dbsetup.csv.Import.csv;
 
 // `testdata.csv`はクラスパス上にある必要があります
-Operation operation = csv("testdata.csv").into("tablename").build();
+Operation operation = csv("testdata.csv").build();
 DbSetup dbSetup = new DbSetup(destination, operation);
 dbSetup.launch();
 ```
@@ -59,7 +59,7 @@ Kotlin:
 import com.sciencesakura.dbsetup.csv.csv
 
 dbSetup(destination) {
-    csv("testdata.csv").into("tablename")
+    csv("testdata.csv")
 }.launch()
 ```
 
