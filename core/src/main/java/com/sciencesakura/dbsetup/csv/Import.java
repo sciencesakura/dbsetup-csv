@@ -147,10 +147,6 @@ public class Import implements Operation {
 
     /**
      * A builder to create the {@code Import} instance.
-     * <p>
-     * This builder can be used only once. Once it has built {@code Import} instance, builder's
-     * methods will throw an {@code IllegalStateException}.
-     * </p>
      *
      * @author sciencesakura
      */
@@ -174,8 +170,6 @@ public class Import implements Operation {
 
         private char quote = '"';
 
-        private boolean built;
-
         private Builder(CSV csv, String table) {
             this.csv = csv;
             this.table = table;
@@ -185,12 +179,9 @@ public class Import implements Operation {
          * Build a new {@code Import} instance.
          *
          * @return the new {@code Import} instance
-         * @throws IllegalStateException if this builder has built an {@code Import} already
          */
         @NotNull
         public Import build() {
-            requireNotBuilt();
-            built = true;
             return new Import(this);
         }
 
@@ -202,11 +193,9 @@ public class Import implements Operation {
          *
          * @param charset the charset
          * @return the reference to this object
-         * @throws IllegalStateException if this builder has built an {@code Import} already
          */
         @NotNull
         public Builder withCharset(@NotNull Charset charset) {
-            requireNotBuilt();
             this.charset = requireNonNull(charset, "charset must not be null");
             return this;
         }
@@ -219,11 +208,9 @@ public class Import implements Operation {
          *
          * @param charset the charset name
          * @return the reference to this object
-         * @throws IllegalStateException if this builder has built an {@code Import} already
          */
         @NotNull
         public Builder withCharset(@NotNull String charset) {
-            requireNotBuilt();
             requireNonNull(charset, "charset must not be null");
             this.charset = Charset.forName(charset);
             return this;
@@ -235,11 +222,9 @@ public class Import implements Operation {
          * @param column the column name
          * @param value  the default value
          * @return the reference to this object
-         * @throws IllegalStateException if this builder has built an {@code Import} already.
          */
         @NotNull
         public Builder withDefaultValue(@NotNull String column, Object value) {
-            requireNotBuilt();
             requireNonNull(column, "column must not be null");
             defaultValues.put(column, value);
             return this;
@@ -253,11 +238,9 @@ public class Import implements Operation {
          *
          * @param delimiter the delimiter character
          * @return the reference to this object
-         * @throws IllegalStateException if this builder has built an {@code Import} already
          */
         @NotNull
         public Builder withDelimiter(char delimiter) {
-            requireNotBuilt();
             this.delimiter = delimiter;
             return this;
         }
@@ -268,11 +251,9 @@ public class Import implements Operation {
          * @param column         the column name
          * @param valueGenerator the generator
          * @return the reference to this object
-         * @throws IllegalStateException if this builder has built an {@code Import} already
          */
         @NotNull
         public Builder withGeneratedValue(@NotNull String column, @NotNull ValueGenerator<?> valueGenerator) {
-            requireNotBuilt();
             requireNonNull(column, "column must not be null");
             requireNonNull(valueGenerator, "valueGenerator must not be null");
             valueGenerators.put(column, valueGenerator);
@@ -287,11 +268,9 @@ public class Import implements Operation {
          *
          * @param headers the header names
          * @return the reference to this object
-         * @throws IllegalStateException if this builder has built an {@code Import} already
          */
         @NotNull
         public Builder withHeader(@NotNull Collection<@NotNull String> headers) {
-            requireNotBuilt();
             requireNonNull(headers, "headers must not be null");
             this.headers = new String[headers.size()];
             int i = 0;
@@ -309,11 +288,9 @@ public class Import implements Operation {
          *
          * @param headers the header names
          * @return the reference to this object
-         * @throws IllegalStateException if this builder has built an {@code Import} already
          */
         @NotNull
         public Builder withHeader(@NotNull String... headers) {
-            requireNotBuilt();
             requireNonNull(headers, "headers must not be null");
             this.headers = new String[headers.length];
             int i = 0;
@@ -331,11 +308,9 @@ public class Import implements Operation {
          *
          * @param nullString the string that represents {@code null} value
          * @return the reference to this object
-         * @throws IllegalStateException if this builder has built an {@code Import} already
          */
         @NotNull
         public Builder withNullAs(@NotNull String nullString) {
-            requireNotBuilt();
             this.nullString = requireNonNull(nullString, "nullString must not be null");
             return this;
         }
@@ -348,17 +323,11 @@ public class Import implements Operation {
          *
          * @param quote the quotation mark
          * @return the reference to this object
-         * @throws IllegalStateException if this builder has built an {@code Import} already
          */
         @NotNull
         public Builder withQuote(char quote) {
-            requireNotBuilt();
             this.quote = quote;
             return this;
-        }
-
-        private void requireNotBuilt() {
-            if (built) throw new IllegalStateException("this operation has been built already");
         }
     }
 }

@@ -35,7 +35,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Collection;
 
@@ -280,109 +279,6 @@ class ImportTest {
             assertThatThrownBy(() -> csv("default.csv").into(table)
                     .withNullAs(nullString))
                     .hasMessage("nullString must not be null");
-        }
-    }
-
-    static class IllegalState {
-
-        @Test
-        void build_after_built() {
-            String table = "table";
-            Import.Builder ib = csv("default.csv").into(table);
-            ib.build();
-            assertThatThrownBy(ib::build)
-                    .isInstanceOf(IllegalStateException.class)
-                    .hasMessage("this operation has been built already");
-        }
-
-        @Test
-        void charset_charset_after_built() {
-            String table = "table";
-            Import.Builder ib = csv("default.csv").into(table);
-            ib.build();
-            assertThatThrownBy(() -> ib.withCharset(StandardCharsets.UTF_8))
-                    .isInstanceOf(IllegalStateException.class)
-                    .hasMessage("this operation has been built already");
-        }
-
-        @Test
-        void string_charset_after_built() {
-            String table = "table";
-            Import.Builder ib = csv("default.csv").into(table);
-            ib.build();
-            assertThatThrownBy(() -> ib.withCharset("UTF-8"))
-                    .isInstanceOf(IllegalStateException.class)
-                    .hasMessage("this operation has been built already");
-        }
-
-        @Test
-        void default_value_after_built() {
-            String table = "table";
-            Import.Builder ib = csv("default.csv").into(table);
-            ib.build();
-            assertThatThrownBy(() -> ib.withDefaultValue("column", "value"))
-                    .isInstanceOf(IllegalStateException.class)
-                    .hasMessage("this operation has been built already");
-        }
-
-        @Test
-        void delimiter_after_built() {
-            String table = "table";
-            Import.Builder ib = csv("default.csv").into(table);
-            ib.build();
-            assertThatThrownBy(() -> ib.withDelimiter(','))
-                    .isInstanceOf(IllegalStateException.class)
-                    .hasMessage("this operation has been built already");
-        }
-
-        @Test
-        void value_generator_after_built() {
-            String table = "table";
-            Import.Builder ib = csv("default.csv").into(table);
-            ib.build();
-            assertThatThrownBy(() -> ib.withGeneratedValue("column", ValueGenerators.sequence()))
-                    .isInstanceOf(IllegalStateException.class)
-                    .hasMessage("this operation has been built already");
-        }
-
-        @Test
-        void collection_headers_after_built() {
-            String table = "table";
-            Import.Builder ib = csv("default.csv").into(table);
-            ib.build();
-            assertThatThrownBy(() -> ib.withHeader(Arrays.asList("a", "b")))
-                    .isInstanceOf(IllegalStateException.class)
-                    .hasMessage("this operation has been built already");
-        }
-
-        @Test
-        void array_headers_after_built() {
-            String table = "table";
-            Import.Builder ib = csv("default.csv").into(table);
-            ib.build();
-            assertThatThrownBy(() -> ib.withHeader("a", "b"))
-                    .isInstanceOf(IllegalStateException.class)
-                    .hasMessage("this operation has been built already");
-        }
-
-        @Test
-        void nullString_after_built() {
-            String table = "table";
-            Import.Builder ib = csv("default.csv").into(table);
-            ib.build();
-            assertThatThrownBy(() -> ib.withNullAs("null"))
-                    .isInstanceOf(IllegalStateException.class)
-                    .hasMessage("this operation has been built already");
-        }
-
-        @Test
-        void quote_after_built() {
-            String table = "table";
-            Import.Builder ib = csv("default.csv").into(table);
-            ib.build();
-            assertThatThrownBy(() -> ib.withQuote('"'))
-                    .isInstanceOf(IllegalStateException.class)
-                    .hasMessage("this operation has been built already");
         }
     }
 }
