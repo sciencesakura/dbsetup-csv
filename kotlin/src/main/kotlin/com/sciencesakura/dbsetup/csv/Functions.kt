@@ -38,7 +38,8 @@ fun DbSetupBuilder.csv(location: String) {
 /**
  * Add a CSV import operation to the `DbSetupBuilder`.
  *
- * @param location the location of the source file that is the relative path from classpath root
+ * @param location  the location of the source file that is the relative path from classpath root
+ * @param configure the function used to configure the CSV import
  * @throws IllegalArgumentException if the source file was not found
  */
 fun DbSetupBuilder.csv(location: String, configure: Import.Builder.() -> Unit) {
