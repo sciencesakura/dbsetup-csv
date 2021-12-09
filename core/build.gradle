@@ -45,6 +45,9 @@ javadoc {
   )
 }
 
-clean {
-  delete javadoc.destinationDir
+tasks.withType(com.github.spotbugs.snom.SpotBugsTask) {
+  reports {
+    xml.enabled = false
+    html.enabled = true
+  }
 }
