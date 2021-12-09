@@ -50,7 +50,3 @@ publishing {
     }
   }
 }
-
-clean {
-  delete dokkaHtml.outputDirectory
-}
