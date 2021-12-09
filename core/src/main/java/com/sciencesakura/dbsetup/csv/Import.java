@@ -84,18 +84,18 @@ public final class Import implements Operation {
     }
 
     private static CSVFormat createFormat(Builder builder) {
-        CSVFormat format = CSVFormat.DEFAULT.withAllowDuplicateHeaderNames(false)
-                .withAllowMissingColumnNames(false)
-                .withDelimiter(builder.delimiter)
-                .withNullString(builder.nullString)
-                .withQuote(builder.quote)
-                .withTrim();
+        CSVFormat.Builder fb = CSVFormat.Builder.create(CSVFormat.DEFAULT)
+            .setAllowDuplicateHeaderNames(false)
+            .setDelimiter(builder.delimiter)
+            .setNullString(builder.nullString)
+            .setQuote(builder.quote)
+            .setTrim(true);
         if (builder.headers == null) {
-            format = format.withFirstRecordAsHeader();
+            fb.setHeader().setSkipHeaderRecord(true);
         } else {
-            format = format.withHeader(builder.headers);
+            fb.setHeader(builder.headers);
         }
-        return format;
+        return fb.build();
     }
 
     private static String getTable(Builder builder) {
