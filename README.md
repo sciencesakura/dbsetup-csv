@@ -12,16 +12,23 @@ A [DbSetup](http://dbsetup.ninja-squad.com/) extension to import data from CSV/T
 
 ## Installation
 
-Gradle:
+### Gradle
+
+#### Java
 
 ```groovy
 testImplementation 'com.sciencesakura:dbsetup-csv:2.0.2'
+```
 
-// optional - Kotlin Extensions
+#### Kotlin
+
+```groovy
 testImplementation 'com.sciencesakura:dbsetup-csv-kt:2.0.2'
 ```
 
-Maven:
+### Maven
+
+#### Java
 
 ```xml
 <dependency>
@@ -30,8 +37,11 @@ Maven:
   <version>2.0.2</version>
   <scope>test</scope>
 </dependency>
+```
 
-<!-- optional - Kotlin Extensions -->
+#### Kotlin
+
+```xml
 <dependency>
   <groupId>com.sciencesakura</groupId>
   <artifactId>dbsetup-csv-kt</artifactId>
