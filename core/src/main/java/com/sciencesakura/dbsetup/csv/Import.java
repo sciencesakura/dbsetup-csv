@@ -98,23 +98,6 @@ public final class Import implements Operation {
         return fb.build();
     }
 
-    private static String getTable(Builder builder) {
-        if (builder.table == null) {
-            String table;
-            try {
-                Path filename = Paths.get(builder.location.toURI()).getFileName();
-                assert filename != null;
-                table = filename.toString();
-            } catch (URISyntaxException e) {
-                throw new DbSetupRuntimeException(e);
-            }
-            int p = table.lastIndexOf('.');
-            return p == -1 ? table : table.substring(0, p);
-        } else {
-            return builder.table;
-        }
-    }
-
     private static Object[] toArray(CSVRecord row) {
         int length = row.size();
         String[] values = new String[length];
@@ -124,24 +107,28 @@ public final class Import implements Operation {
         return values;
     }
 
-    private final Operation internalOperation;
+    private final Builder builder;
+    private Operation internalOperation;
 
     private Import(Builder builder) {
-        CSVFormat format = createFormat(builder);
-        Insert.Builder ib = Insert.into(getTable(builder));
-        try (CSVParser csv = CSVParser.parse(builder.location.openStream(), builder.charset, format)) {
-            ib.columns(csv.getHeaderNames().toArray(EMPTY_ARRAY));
-            builder.defaultValues.forEach(ib::withDefaultValue);
-            builder.valueGenerators.forEach(ib::withGeneratedValue);
-            csv.forEach(row -> ib.values(toArray(row)));
-        } catch (IOException e) {
-            throw new DbSetupRuntimeException("failed to open " + builder.location, e);
-        }
-        internalOperation = ib.build();
+        this.builder = builder;
     }
 
     @Override
     public void execute(Connection connection, BinderConfiguration configuration) throws SQLException {
+        if (internalOperation == null) {
+            CSVFormat format = createFormat(builder);
+            Insert.Builder ib = Insert.into(builder.table());
+            try (CSVParser csv = CSVParser.parse(builder.location.openStream(), builder.charset, format)) {
+                ib.columns(csv.getHeaderNames().toArray(EMPTY_ARRAY));
+                builder.defaultValues.forEach(ib::withDefaultValue);
+                builder.valueGenerators.forEach(ib::withGeneratedValue);
+                csv.forEach(row -> ib.values(toArray(row)));
+            } catch (IOException e) {
+                throw new DbSetupRuntimeException("failed to open " + builder.location, e);
+            }
+            internalOperation = ib.build();
+        }
         internalOperation.execute(connection, configuration);
     }
 
@@ -170,12 +157,15 @@ public final class Import implements Operation {
 
         private char quote = '"';
 
+        private boolean built;
+
         private Builder(String location) {
             requireNonNull(location, "location must not be null");
-            this.location = getClass().getClassLoader().getResource(location);
-            if (this.location == null) {
+            URL urlLocation = getClass().getClassLoader().getResource(location);
+            if (urlLocation == null) {
                 throw new IllegalArgumentException(location + " not found");
             }
+            this.location = urlLocation;
         }
 
         /**
@@ -185,6 +175,10 @@ public final class Import implements Operation {
          */
         @NotNull
         public Import build() {
+            if (built) {
+                throw new IllegalStateException("already built");
+            }
+            built = true;
             return new Import(this);
         }
 
@@ -198,6 +192,9 @@ public final class Import implements Operation {
          * @return the reference to this object
          */
         public Builder into(@NotNull String table) {
+            if (built) {
+                throw new IllegalStateException("already built");
+            }
             this.table = requireNonNull(table, "table must not be null");
             return this;
         }
@@ -212,6 +209,9 @@ public final class Import implements Operation {
          * @return the reference to this object
          */
         public Builder withCharset(@NotNull Charset charset) {
+            if (built) {
+                throw new IllegalStateException("already built");
+            }
             this.charset = requireNonNull(charset, "charset must not be null");
             return this;
         }
@@ -227,8 +227,7 @@ public final class Import implements Operation {
          */
         public Builder withCharset(@NotNull String charset) {
             requireNonNull(charset, "charset must not be null");
-            this.charset = Charset.forName(charset);
-            return this;
+            return withCharset(Charset.forName(charset));
         }
 
         /**
@@ -239,6 +238,9 @@ public final class Import implements Operation {
          * @return the reference to this object
          */
         public Builder withDefaultValue(@NotNull String column, Object value) {
+            if (built) {
+                throw new IllegalStateException("already built");
+            }
             requireNonNull(column, "column must not be null");
             defaultValues.put(column, value);
             return this;
@@ -254,6 +256,9 @@ public final class Import implements Operation {
          * @return the reference to this object
          */
         public Builder withDelimiter(char delimiter) {
+            if (built) {
+                throw new IllegalStateException("already built");
+            }
             this.delimiter = delimiter;
             return this;
         }
@@ -266,6 +271,9 @@ public final class Import implements Operation {
          * @return the reference to this object
          */
         public Builder withGeneratedValue(@NotNull String column, @NotNull ValueGenerator<?> valueGenerator) {
+            if (built) {
+                throw new IllegalStateException("already built");
+            }
             requireNonNull(column, "column must not be null");
             requireNonNull(valueGenerator, "valueGenerator must not be null");
             valueGenerators.put(column, valueGenerator);
@@ -282,6 +290,9 @@ public final class Import implements Operation {
          * @return the reference to this object
          */
         public Builder withHeader(@NotNull Collection<@NotNull String> headers) {
+            if (built) {
+                throw new IllegalStateException("already built");
+            }
             requireNonNull(headers, "headers must not be null");
             this.headers = new String[headers.size()];
             int i = 0;
@@ -301,6 +312,9 @@ public final class Import implements Operation {
          * @return the reference to this object
          */
         public Builder withHeader(@NotNull String... headers) {
+            if (built) {
+                throw new IllegalStateException("already built");
+            }
             requireNonNull(headers, "headers must not be null");
             this.headers = new String[headers.length];
             int i = 0;
@@ -320,6 +334,9 @@ public final class Import implements Operation {
          * @return the reference to this object
          */
         public Builder withNullAs(@NotNull String nullString) {
+            if (built) {
+                throw new IllegalStateException("already built");
+            }
             this.nullString = requireNonNull(nullString, "nullString must not be null");
             return this;
         }
@@ -334,8 +351,28 @@ public final class Import implements Operation {
          * @return the reference to this object
          */
         public Builder withQuote(char quote) {
+            if (built) {
+                throw new IllegalStateException("already built");
+            }
             this.quote = quote;
             return this;
+        }
+
+        private String table() {
+            if (table == null) {
+                String table;
+                try {
+                    Path filename = Paths.get(location.toURI()).getFileName();
+                    assert filename != null;
+                    table = filename.toString();
+                } catch (URISyntaxException e) {
+                    throw new DbSetupRuntimeException(e);
+                }
+                int p = table.lastIndexOf('.');
+                return p == -1 ? table : table.substring(0, p);
+            } else {
+                return table;
+            }
         }
     }
 }
