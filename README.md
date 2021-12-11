@@ -52,7 +52,7 @@ testImplementation 'com.sciencesakura:dbsetup-csv-kt:2.0.2'
 
 ## Usage
 
-Java:
+### Java
 
 ```java
 import static com.sciencesakura.dbsetup.csv.Import.csv;
@@ -63,12 +63,13 @@ DbSetup dbSetup = new DbSetup(destination, operation);
 dbSetup.launch();
 ```
 
-Kotlin:
+### Kotlin
 
 ```kotlin
 import com.sciencesakura.dbsetup.csv.csv
 
 dbSetup(destination) {
+    // `testdata.csv` must be in classpath.
     csv("testdata.csv")
 }.launch()
 ```
