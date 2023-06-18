@@ -56,6 +56,11 @@
     <plugins>
       <plugin>
         <artifactId>maven-checkstyle-plugin</artifactId>
+        <configuration>
+          <propertyExpansion>
+            org.checkstyle.google.suppressionfilter.config=${project.basedir}/../config/checkstyle/suppressions.xml
+          </propertyExpansion>
+        </configuration>
       </plugin>
       <plugin>
         <artifactId>maven-javadoc-plugin</artifactId>

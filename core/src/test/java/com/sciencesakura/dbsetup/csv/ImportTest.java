@@ -21,7 +21,13 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+
 package com.sciencesakura.dbsetup.csv;
+
+import static com.ninja_squad.dbsetup.Operations.sql;
+import static com.sciencesakura.dbsetup.csv.Import.csv;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.db.api.Assertions.assertThat;
 
 import com.ninja_squad.dbsetup.DbSetup;
 import com.ninja_squad.dbsetup.destination.Destination;
@@ -29,19 +35,13 @@ import com.ninja_squad.dbsetup.destination.DriverManagerDestination;
 import com.ninja_squad.dbsetup.generator.ValueGenerator;
 import com.ninja_squad.dbsetup.generator.ValueGenerators;
 import com.ninja_squad.dbsetup.operation.Operation;
+import java.nio.charset.Charset;
+import java.util.Arrays;
+import java.util.Collection;
 import org.assertj.db.type.Changes;
 import org.assertj.db.type.Source;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-
-import java.nio.charset.Charset;
-import java.util.Arrays;
-import java.util.Collection;
-
-import static com.ninja_squad.dbsetup.Operations.sql;
-import static com.sciencesakura.dbsetup.csv.Import.csv;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.assertj.db.api.Assertions.assertThat;
 
 class ImportTest {
 

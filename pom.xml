@@ -57,7 +57,7 @@
           <configuration>
             <configLocation>google_checks.xml</configLocation>
             <consoleOutput>true</consoleOutput>
-            <failOnViolation>false</failOnViolation>
+            <failOnViolation>true</failOnViolation>
           </configuration>
           <executions>
             <execution>
