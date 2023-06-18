@@ -1,2 +1,4 @@
+*.cmd   text eol=crlf
+
 docs/core/** linguist-generated
 docs/kotlin/** linguist-generated
