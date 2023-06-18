@@ -43,7 +43,7 @@ private val setUpQueries = arrayOf(
       a integer primary key,
       b integer
     )
-    """
+    """,
 )
 
 class CsvTest {
