@@ -20,3 +20,4 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           folder: docs
+          clean: true
