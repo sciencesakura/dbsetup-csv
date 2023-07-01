@@ -45,7 +45,6 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
-import org.apache.commons.csv.CSVRecord;
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -66,8 +65,6 @@ import org.jetbrains.annotations.NotNull;
  */
 public final class Import implements Operation {
 
-    private static final String[] EMPTY_ARRAY = {};
-
     /**
      * Creates a new {@code Import.Builder} instance.
      * <p>
@@ -80,7 +77,12 @@ public final class Import implements Operation {
      */
     @NotNull
     public static Builder csv(@NotNull String location) {
-        return new Builder(location);
+        var urlLocation = Import.class.getClassLoader()
+            .getResource(requireNonNull(location, "location must not be null"));
+        if (urlLocation == null) {
+            throw new IllegalArgumentException(location + " not found");
+        }
+        return new Builder(urlLocation);
     }
 
     private static CSVFormat createFormat(Builder builder) {
@@ -97,37 +99,23 @@ public final class Import implements Operation {
         return fb.build();
     }
 
-    private static Object[] toArray(CSVRecord row) {
-        int length = row.size();
-        String[] values = new String[length];
-        for (int i = 0; i < length; i++) {
-            values[i] = row.get(i);
-        }
-        return values;
-    }
-
-    private final Builder builder;
-    private Operation internalOperation;
+    private final Operation internalOperation;
 
     private Import(Builder builder) {
-        this.builder = builder;
+        var ib = Insert.into(builder.table());
+        try (var csv = CSVParser.parse(builder.location.openStream(), builder.charset, createFormat(builder))) {
+            ib.columns(csv.getHeaderNames().toArray(new String[0]));
+            builder.defaultValues.forEach(ib::withDefaultValue);
+            builder.valueGenerators.forEach(ib::withGeneratedValue);
+            csv.forEach(row -> ib.values((Object[]) row.values()));
+        } catch (IOException e) {
+            throw new DbSetupRuntimeException("failed to open " + builder.location, e);
+        }
+        internalOperation = ib.build();
     }
 
     @Override
     public void execute(Connection connection, BinderConfiguration configuration) throws SQLException {
-        if (internalOperation == null) {
-            CSVFormat format = createFormat(builder);
-            Insert.Builder ib = Insert.into(builder.table());
-            try (CSVParser csv = CSVParser.parse(builder.location.openStream(), builder.charset, format)) {
-                ib.columns(csv.getHeaderNames().toArray(EMPTY_ARRAY));
-                builder.defaultValues.forEach(ib::withDefaultValue);
-                builder.valueGenerators.forEach(ib::withGeneratedValue);
-                csv.forEach(row -> ib.values(toArray(row)));
-            } catch (IOException e) {
-                throw new DbSetupRuntimeException("failed to open " + builder.location, e);
-            }
-            internalOperation = ib.build();
-        }
         internalOperation.execute(connection, configuration);
     }
 
@@ -158,13 +146,8 @@ public final class Import implements Operation {
 
         private boolean built;
 
-        private Builder(String location) {
-            requireNonNull(location, "location must not be null");
-            URL urlLocation = getClass().getClassLoader().getResource(location);
-            if (urlLocation == null) {
-                throw new IllegalArgumentException(location + " not found");
-            }
-            this.location = urlLocation;
+        private Builder(URL location) {
+            this.location = location;
         }
 
         /**
@@ -191,9 +174,6 @@ public final class Import implements Operation {
          * @return the reference to this object
          */
         public Builder into(@NotNull String table) {
-            if (built) {
-                throw new IllegalStateException("already built");
-            }
             this.table = requireNonNull(table, "table must not be null");
             return this;
         }
@@ -208,9 +188,6 @@ public final class Import implements Operation {
          * @return the reference to this object
          */
         public Builder withCharset(@NotNull Charset charset) {
-            if (built) {
-                throw new IllegalStateException("already built");
-            }
             this.charset = requireNonNull(charset, "charset must not be null");
             return this;
         }
@@ -237,9 +214,6 @@ public final class Import implements Operation {
          * @return the reference to this object
          */
         public Builder withDefaultValue(@NotNull String column, Object value) {
-            if (built) {
-                throw new IllegalStateException("already built");
-            }
             requireNonNull(column, "column must not be null");
             defaultValues.put(column, value);
             return this;
@@ -255,9 +229,6 @@ public final class Import implements Operation {
          * @return the reference to this object
          */
         public Builder withDelimiter(char delimiter) {
-            if (built) {
-                throw new IllegalStateException("already built");
-            }
             this.delimiter = delimiter;
             return this;
         }
@@ -270,9 +241,6 @@ public final class Import implements Operation {
          * @return the reference to this object
          */
         public Builder withGeneratedValue(@NotNull String column, @NotNull ValueGenerator<?> valueGenerator) {
-            if (built) {
-                throw new IllegalStateException("already built");
-            }
             requireNonNull(column, "column must not be null");
             requireNonNull(valueGenerator, "valueGenerator must not be null");
             valueGenerators.put(column, valueGenerator);
@@ -289,9 +257,6 @@ public final class Import implements Operation {
          * @return the reference to this object
          */
         public Builder withHeader(@NotNull Collection<@NotNull String> headers) {
-            if (built) {
-                throw new IllegalStateException("already built");
-            }
             requireNonNull(headers, "headers must not be null");
             this.headers = new String[headers.size()];
             int i = 0;
@@ -311,9 +276,6 @@ public final class Import implements Operation {
          * @return the reference to this object
          */
         public Builder withHeader(@NotNull String... headers) {
-            if (built) {
-                throw new IllegalStateException("already built");
-            }
             requireNonNull(headers, "headers must not be null");
             this.headers = new String[headers.length];
             int i = 0;
@@ -333,9 +295,6 @@ public final class Import implements Operation {
          * @return the reference to this object
          */
         public Builder withNullAs(@NotNull String nullString) {
-            if (built) {
-                throw new IllegalStateException("already built");
-            }
             this.nullString = requireNonNull(nullString, "nullString must not be null");
             return this;
         }
@@ -350,9 +309,6 @@ public final class Import implements Operation {
          * @return the reference to this object
          */
         public Builder withQuote(char quote) {
-            if (built) {
-                throw new IllegalStateException("already built");
-            }
             this.quote = quote;
             return this;
         }
