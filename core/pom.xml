@@ -60,6 +60,16 @@
         </configuration>
       </plugin>
       <plugin>
+        <artifactId>maven-jar-plugin</artifactId>
+        <configuration>
+          <archive>
+            <manifestEntries>
+              <Automatic-Module-Name>com.sciencesakura.dbsetup.csv</Automatic-Module-Name>
+            </manifestEntries>
+          </archive>
+        </configuration>
+      </plugin>
+      <plugin>
         <artifactId>maven-javadoc-plugin</artifactId>
         <configuration>
           <reportOutputDirectory>${project.basedir}/../docs</reportOutputDirectory>
