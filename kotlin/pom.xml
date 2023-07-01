@@ -70,6 +70,9 @@
       <plugin>
         <groupId>org.jetbrains.dokka</groupId>
         <artifactId>dokka-maven-plugin</artifactId>
+        <configuration>
+          <outputDir>${project.basedir}/../docs/dokka</outputDir>
+        </configuration>
       </plugin>
       <plugin>
         <groupId>org.jetbrains.kotlin</groupId>
