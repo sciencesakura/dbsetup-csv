@@ -10,4 +10,4 @@ jobs:
           distribution: zulu
           java-version: 11
           cache: maven
-      - run: ./mvnw -e --batch-mode validate
+      - run: ./mvnw -e --batch-mode test

@@ -94,6 +94,7 @@
           <version>3.3.0</version>
           <configuration>
             <archive>
+              <manifestFile>${project.build.outputDirectory}/META-INF/MANIFEST.MF</manifestFile>
               <manifest>
                 <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
               </manifest>
@@ -151,10 +152,10 @@
         <plugin>
           <groupId>com.github.spotbugs</groupId>
           <artifactId>spotbugs-maven-plugin</artifactId>
-          <version>4.7.3.4</version>
+          <version>4.7.3.5</version>
           <executions>
             <execution>
-              <phase>validate</phase>
+              <phase>test</phase>
               <goals>
                 <goal>check</goal>
               </goals>
@@ -173,7 +174,7 @@
           </configuration>
           <executions>
             <execution>
-              <phase>process-classes</phase>
+              <phase>prepare-package</phase>
               <goals>
                 <goal>manifest</goal>
               </goals>
@@ -229,7 +230,6 @@
         <version>3.1.0</version>
         <executions>
           <execution>
-            <phase>verify</phase>
             <goals>
               <goal>sign</goal>
             </goals>
