@@ -85,7 +85,6 @@ public final class Import implements Operation {
 
     private static CSVFormat createFormat(Builder builder) {
         CSVFormat.Builder fb = CSVFormat.Builder.create(CSVFormat.DEFAULT)
-            .setAllowDuplicateHeaderNames(false)
             .setDelimiter(builder.delimiter)
             .setNullString(builder.nullString)
             .setQuote(builder.quote)
