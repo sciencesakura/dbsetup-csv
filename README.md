@@ -4,7 +4,7 @@
 
 A [DbSetup](http://dbsetup.ninja-squad.com/) extension to import data from CSV/TSV files.
 
-![](https://github.com/sciencesakura/dbsetup-csv/workflows/build/badge.svg) [![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.sciencesakura/dbsetup-csv/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.sciencesakura/dbsetup-csv)
+![](https://github.com/sciencesakura/dbsetup-csv/actions/workflows/check.yaml/badge.svg) [![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.sciencesakura/dbsetup-csv/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.sciencesakura/dbsetup-csv)
 
 ## Requirements
 
@@ -57,10 +57,15 @@ testImplementation 'com.sciencesakura:dbsetup-csv-kt:2.0.2'
 ```java
 import static com.sciencesakura.dbsetup.csv.Import.csv;
 
-// `testdata.csv` must be in classpath.
-Operation operation = csv("testdata.csv").build();
-DbSetup dbSetup = new DbSetup(destination, operation);
-dbSetup.launch();
+@BeforeEach
+void setUp() {
+  var operations = sequenceOf(
+    truncate("my_table"),
+    // `testdata.csv` must be in classpath.
+    csv("testdata.csv").into("my_table").build());
+  var dbSetup = new DbSetup(destination, operations);
+  dbSetup.launch();
+}
 ```
 
 ### Kotlin
@@ -68,10 +73,15 @@ dbSetup.launch();
 ```kotlin
 import com.sciencesakura.dbsetup.csv.csv
 
-dbSetup(destination) {
+@BeforeEach
+fun setUp() {
+  dbSetup(destination) {
     // `testdata.csv` must be in classpath.
-    csv("testdata.csv")
-}.launch()
+    csv("testdata.csv") {
+      into("my_table")
+    }
+  }.launch()
+}
 ```
 
 See [API reference](https://sciencesakura.github.io/dbsetup-csv/) for details.
