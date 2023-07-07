@@ -49,17 +49,24 @@ import org.jetbrains.annotations.NotNull;
 
 /**
  * An operation which imports the CSV file into the specified table.
- * <p>
- * Usage:
- * </p>
- * <pre><code>
- * import static com.sciencesakura.dbsetup.csv.Import.csv;
  *
- * // `testdata.csv` must be in classpath.
- * Operation operation = csv("testdata.csv").build();
- * DbSetup dbSetup = new DbSetup(destination, operation);
- * dbSetup.launch();
- * </code></pre>
+ * <h2>Usage</h2>
+ * <p>We recommend to import {@code csv} method statically so that your code looks clearer.</p>
+ * <pre>
+ * {@code import static com.sciencesakura.dbsetup.csv.Import.csv;}
+ * </pre>
+ * <p>Then you can use {@code csv} method as follows:</p>
+ * <pre>
+ * {@code @BeforeEach
+ * void setUp() {
+ *   var operations = sequenceOf(
+ *     truncate("my_table"),
+ *     csv("testdata.csv").into("my_table").build());
+ *   var dbSetup = new DbSetup(destination, operations);
+ *   dbSetup.launch();
+ * }
+ * }
+ * </pre>
  *
  * @author sciencesakura
  */
@@ -121,6 +128,17 @@ public final class Import implements Operation {
 
     /**
      * A builder to create the {@code Import} instance.
+     *
+     * <h2>Usage</h2>
+     * <p>The default settings are:</p>
+     * <ul>
+     *   <li>{@code withCharset("UTF-8")}</li>
+     *   <li>{@code withDelimiter(',')}</li>
+     *   <li>{@code withNullAs("")}</li>
+     *   <li>{@code withQuote('"')}</li>
+     *   <li>The source file name excluding extension is used as the table name.</li>
+     *   <li>The first row of the source file is treated as the header row.</li>
+     * </ul>
      *
      * @author sciencesakura
      */
@@ -203,7 +221,8 @@ public final class Import implements Operation {
          */
         public Builder withCharset(@NotNull String charset) {
             requireNonNull(charset, "charset must not be null");
-            return withCharset(Charset.forName(charset));
+            this.charset = Charset.forName(charset);
+            return this;
         }
 
         /**
