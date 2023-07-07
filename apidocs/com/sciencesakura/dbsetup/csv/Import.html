@@ -139,17 +139,24 @@ $('.navPadding').css('padding-top', $('.fixedNav').css("height"));
 extends <a href="https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/lang/Object.html?is-external=true" title="class or interface in java.lang" class="externalLink">Object</a>
 implements com.ninja_squad.dbsetup.operation.Operation</pre>
 <div class="block">An operation which imports the CSV file into the specified table.
- <p>
- Usage:
- </p>
- <pre><code>
- import static com.sciencesakura.dbsetup.csv.Import.csv;
 
- // `testdata.csv` must be in classpath.
- Operation operation = csv("testdata.csv").build();
- DbSetup dbSetup = new DbSetup(destination, operation);
- dbSetup.launch();
- </code></pre></div>
+ <h2>Usage</h2>
+ <p>We recommend to import <code>csv</code> method statically so that your code looks clearer.</p>
+ <pre>
+ <code>import static com.sciencesakura.dbsetup.csv.Import.csv;</code>
+ </pre>
+ <p>Then you can use <code>csv</code> method as follows:</p>
+ <pre>
+ <code>@BeforeEach
+ void setUp() {
+   var operations = sequenceOf(
+     truncate("my_table"),
+     csv("testdata.csv").into("my_table").build());
+   var dbSetup = new DbSetup(destination, operations);
+   dbSetup.launch();
+ }
+ </code>
+ </pre></div>
 </li>
 </ul>
 </div>
