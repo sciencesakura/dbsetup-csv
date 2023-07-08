@@ -8,7 +8,7 @@ CSV/TSVファイルからデータ取り込みができる[DbSetup](http://dbset
 
 ## Requirements
 
-* Java 8+
+* Java 11+
 
 ## Installation
 
@@ -17,13 +17,13 @@ CSV/TSVファイルからデータ取り込みができる[DbSetup](http://dbset
 #### Java
 
 ```groovy
-testImplementation 'com.sciencesakura:dbsetup-csv:2.0.2'
+testImplementation 'com.sciencesakura:dbsetup-csv:3.0.0'
 ```
 
 #### Kotlin
 
 ```groovy
-testImplementation 'com.sciencesakura:dbsetup-csv-kt:2.0.2'
+testImplementation 'com.sciencesakura:dbsetup-csv-kt:3.0.0'
 ```
 
 ### Maven
@@ -34,7 +34,7 @@ testImplementation 'com.sciencesakura:dbsetup-csv-kt:2.0.2'
 <dependency>
   <groupId>com.sciencesakura</groupId>
   <artifactId>dbsetup-csv</artifactId>
-  <version>2.0.2</version>
+  <version>3.0.0</version>
   <scope>test</scope>
 </dependency>
 ```
@@ -45,7 +45,7 @@ testImplementation 'com.sciencesakura:dbsetup-csv-kt:2.0.2'
 <dependency>
   <groupId>com.sciencesakura</groupId>
   <artifactId>dbsetup-csv-kt</artifactId>
-  <version>2.0.2</version>
+  <version>3.0.0</version>
   <scope>test</scope>
 </dependency>
 ```
