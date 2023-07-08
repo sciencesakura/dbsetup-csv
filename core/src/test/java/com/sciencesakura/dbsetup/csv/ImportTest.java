@@ -24,7 +24,9 @@
 
 package com.sciencesakura.dbsetup.csv;
 
+import static com.ninja_squad.dbsetup.Operations.sequenceOf;
 import static com.ninja_squad.dbsetup.Operations.sql;
+import static com.ninja_squad.dbsetup.Operations.truncate;
 import static com.sciencesakura.dbsetup.csv.Import.csv;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.db.api.Assertions.assertThat;
@@ -32,262 +34,560 @@ import static org.assertj.db.api.Assertions.assertThat;
 import com.ninja_squad.dbsetup.DbSetup;
 import com.ninja_squad.dbsetup.destination.Destination;
 import com.ninja_squad.dbsetup.destination.DriverManagerDestination;
-import com.ninja_squad.dbsetup.generator.ValueGenerator;
 import com.ninja_squad.dbsetup.generator.ValueGenerators;
-import com.ninja_squad.dbsetup.operation.Operation;
+import java.math.BigDecimal;
 import java.nio.charset.Charset;
-import java.util.Arrays;
+import java.nio.charset.StandardCharsets;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
+import java.util.UUID;
 import org.assertj.db.type.Changes;
 import org.assertj.db.type.Source;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 class ImportTest {
 
-    private static final String url = "jdbc:h2:mem:test;DB_CLOSE_DELAY=-1";
+  static final String url = "jdbc:h2:mem:test;DB_CLOSE_DELAY=-1";
 
-    private static final String username = "sa";
+  static final String username = "sa";
 
-    private static final Source source = new Source(url, username, null);
+  Source source;
 
-    private static final Destination destination = new DriverManagerDestination(url, username, null);
+  Destination destination;
 
-    private static final Operation setUpQueries = sql(
-        "drop table if exists table_1 cascade",
-        "create table table_1 (" +
-            "  a   integer primary key," +
-            "  b   bigint," +
-            "  c   decimal(7, 3)," +
-            "  d   date," +
-            "  e   timestamp," +
-            "  f   char(3)," +
-            "  g   varchar(6)," +
-            "  h   boolean," +
-            "  i   varchar(6)" +
-            ")"
-    );
+  @BeforeEach
+  void setUp() {
+    source = new Source(url, username, null);
+    destination = new DriverManagerDestination(url, username, null);
+  }
+
+  @Nested
+  class DataTypes {
 
     @BeforeEach
     void setUp() {
-        new DbSetup(destination, setUpQueries).launch();
+      var ddl = sql("create table if not exists data_types ("
+          + "id uuid not null,"
+          + "num1 smallint,"
+          + "num2 integer,"
+          + "num3 bigint,"
+          + "num4 real,"
+          + "num5 decimal(7,3),"
+          + "text1 char(5),"
+          + "text2 varchar(100),"
+          + "date1 timestamp,"
+          + "date2 date,"
+          + "date3 time,"
+          + "bool1 boolean,"
+          + "primary key (id)"
+          + ")");
+      new DbSetup(destination, sequenceOf(ddl, truncate("data_types"))).launch();
     }
 
     @Test
-    void import_csv_default() {
-        Changes changes = new Changes(source).setStartPointNow();
-        Operation operation = csv("table_1.csv")
-            .into("table_1")
-            .build();
-        new DbSetup(destination, operation).launch();
-        changes.setEndPointNow();
-        validateChanges(changes);
+    void import_with_default_settings() {
+      var changes = new Changes(source).setStartPointNow();
+      var operation = csv("DataTypes/data_types.csv").build();
+      new DbSetup(destination, operation).launch();
+      assertThat(changes.setEndPointNow())
+          .hasNumberOfChanges(2)
+          .changeOfCreation()
+          .rowAtEndPoint()
+          .value("id").isEqualTo(new UUID(0, 1))
+          .value("num1").isEqualTo(1000)
+          .value("num2").isEqualTo(20000)
+          .value("num3").isEqualTo(3000000000L)
+          .value("num4").isEqualTo(400.75)
+          .value("num5").isEqualTo(new BigDecimal("5000.333"))
+          .value("text1").isEqualTo("aaa  ")
+          .value("text2").isEqualTo("bbb")
+          .value("date1").isEqualTo(LocalDateTime.parse("2001-02-03T10:20:30.456"))
+          .value("date2").isEqualTo(LocalDate.parse("2001-02-03"))
+          .value("date3").isEqualTo(LocalTime.parse("10:20:30"))
+          .value("bool1").isTrue()
+          .changeOfCreation()
+          .rowAtEndPoint()
+          .value("id").isEqualTo(new UUID(0, 2))
+          .value("num1").isNull()
+          .value("num2").isNull()
+          .value("num3").isNull()
+          .value("num4").isNull()
+          .value("num5").isNull()
+          .value("text1").isNull()
+          .value("text2").isNull()
+          .value("date1").isNull()
+          .value("date2").isNull()
+          .value("date3").isNull()
+          .value("bool1").isFalse();
+    }
+  }
+
+  @Nested
+  class CsvFile {
+
+    @Test
+    void throw_npe_if_location_is_null() {
+      assertThatThrownBy(() -> csv(null))
+          .isInstanceOf(NullPointerException.class)
+          .hasMessage("location must not be null");
     }
 
     @Test
-    void import_tsv_pgsql_style() {
-        Changes changes = new Changes(source).setStartPointNow();
-        Operation operation = csv("table_1_pqsql.tsv")
-            .into("table_1")
-            .withDelimiter('\t')
-            .withHeader("a", "b", "c", "d", "e", "f", "g", "h", "i")
-            .withNullAs("\\N")
-            .build();
-        new DbSetup(destination, operation).launch();
-        changes.setEndPointNow();
-        validateChanges(changes);
+    void throw_iae_if_location_has_bean_not_found() {
+      assertThatThrownBy(() -> csv("not_found.csv"))
+          .isInstanceOf(IllegalArgumentException.class)
+          .hasMessage("not_found.csv not found");
+    }
+  }
+
+  @Nested
+  class IntoTable {
+
+    @BeforeEach
+    void setUp() {
+      var ddl = sql("create table if not exists into_table ("
+          + "id integer primary key,"
+          + "name varchar(100)"
+          + ")");
+      new DbSetup(destination, sequenceOf(ddl, truncate("into_table"))).launch();
     }
 
     @Test
-    void import_without_into() {
-        Changes changes = new Changes(source).setStartPointNow();
-        Operation operation = csv("table_1.csv").build();
-        new DbSetup(destination, operation).launch();
-        changes.setEndPointNow();
-        validateChanges(changes);
+    void resolve_table_name_from_file_name() {
+      var changes = new Changes(source).setStartPointNow();
+      var operation = csv("IntoTable/into_table.csv").build();
+      new DbSetup(destination, operation).launch();
+      assertThat(changes.setEndPointNow())
+          .hasNumberOfChanges(1)
+          .changeOfCreation()
+          .rowAtEndPoint()
+          .value("id").isEqualTo(1)
+          .value("name").isEqualTo("Alice");
     }
 
     @Test
-    void import_without_into__no_extension() {
-        Changes changes = new Changes(source).setStartPointNow();
-        Operation operation = csv("table_1").build();
-        new DbSetup(destination, operation).launch();
-        changes.setEndPointNow();
-        validateChanges(changes);
+    void specify_table_name_explicitly() {
+      var changes = new Changes(source).setStartPointNow();
+      var operation = csv("IntoTable/into_table_2.csv").into("into_table").build();
+      new DbSetup(destination, operation).launch();
+      assertThat(changes.setEndPointNow())
+          .hasNumberOfChanges(1)
+          .changeOfCreation()
+          .rowAtEndPoint()
+          .value("id").isEqualTo(1)
+          .value("name").isEqualTo("Alice");
     }
 
     @Test
-    void use_generators() {
-        Changes changes = new Changes(source).setStartPointNow();
-        Operation operation = csv("table_1_generators.csv")
-            .into("table_1")
-            .withGeneratedValue("a", ValueGenerators.sequence())
-            .withGeneratedValue("g", ValueGenerators.stringSequence("G-"))
-            .build();
-        new DbSetup(destination, operation).launch();
-        changes.setEndPointNow();
-        assertThat(changes).hasNumberOfChanges(2)
-            .changeOfCreation()
-            .rowAtEndPoint()
-            .value("a").isEqualTo(1)
-            .value("g").isEqualTo("G-1")
-            .changeOfCreation()
-            .rowAtEndPoint()
-            .value("a").isEqualTo(2)
-            .value("g").isEqualTo("G-2");
+    void throw_npe_if_table_name_is_null() {
+      assertThatThrownBy(() -> csv("IntoTable/into_table_2.csv").into(null))
+          .isInstanceOf(NullPointerException.class)
+          .hasMessage("table must not be null");
+    }
+  }
+
+  @Nested
+  class WithCharset {
+
+    @BeforeEach
+    void setUp() {
+      var ddl = sql("create table if not exists with_charset ("
+          + "id integer primary key,"
+          + "name varchar(100)"
+          + ")");
+      new DbSetup(destination, sequenceOf(ddl, truncate("with_charset"))).launch();
     }
 
     @Test
-    void use_constants() {
-        Changes changes = new Changes(source).setStartPointNow();
-        Operation operation = csv("table_1_constants.csv")
-            .into("table_1")
-            .withDefaultValue("g", "G")
-            .withDefaultValue("i", null)
-            .build();
-        new DbSetup(destination, operation).launch();
-        changes.setEndPointNow();
-        assertThat(changes).hasNumberOfChanges(2)
-            .changeOfCreation()
-            .rowAtEndPoint()
-            .value("g").isEqualTo("G")
-            .value("i").isNull()
-            .changeOfCreation()
-            .rowAtEndPoint()
-            .value("g").isEqualTo("G")
-            .value("i").isNull();
+    void use_utf8_if_not_specified() {
+      var changes = new Changes(source).setStartPointNow();
+      var operation = csv("WithCharset/utf8.csv").into("with_charset").build();
+      new DbSetup(destination, operation).launch();
+      assertThat(changes.setEndPointNow())
+          .hasNumberOfChanges(1)
+          .changeOfCreation()
+          .rowAtEndPoint()
+          .value("id").isEqualTo(1)
+          .value("name").isEqualTo("田中　太郎");
     }
 
-    private static void validateChanges(Changes changes) {
-        assertThat(changes).hasNumberOfChanges(2)
-            .changeOfCreation()
-            .rowAtEndPoint()
-            .value("a").isEqualTo(100)
-            .value("b").isEqualTo(10000000000L)
-            .value("c").isEqualTo(0.5)
-            .value("d").isEqualTo("2019-12-01")
-            .value("e").isEqualTo("2019-12-01T09:30:01.001000000")
-            .value("f").isEqualTo("AAA")
-            .value("g").isEqualTo("甲")
-            .value("h").isTrue()
-            .value("i").isNotNull()
-            .changeOfCreation()
-            .rowAtEndPoint()
-            .value("a").isEqualTo(200)
-            .value("b").isEqualTo(20000000000L)
-            .value("c").isEqualTo(0.25)
-            .value("d").isEqualTo("2019-12-02")
-            .value("e").isEqualTo("2019-12-02T09:30:02.002000000")
-            .value("f").isEqualTo("BBB")
-            .value("g").isEqualTo("乙")
-            .value("h").isFalse()
-            .value("i").isNull();
+    @Test
+    void specify_charset_explicitly() {
+      var changes = new Changes(source).setStartPointNow();
+      var operation = csv("WithCharset/utf16.csv").into("with_charset")
+          .withCharset(StandardCharsets.UTF_16).build();
+      new DbSetup(destination, operation).launch();
+      assertThat(changes.setEndPointNow())
+          .hasNumberOfChanges(1)
+          .changeOfCreation()
+          .rowAtEndPoint()
+          .value("id").isEqualTo(1)
+          .value("name").isEqualTo("田中　太郎");
     }
 
-    static class IllegalArgument {
-
-        @Test
-        void file_not_found() {
-            assertThatThrownBy(() -> csv("file_not_found"))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessage("file_not_found not found");
-        }
-
-        @Test
-        void location_is_null() {
-            String location = null;
-            assertThatThrownBy(() -> csv(location))
-                .hasMessage("location must not be null");
-        }
-
-        @Test
-        void table_is_null() {
-            String table = null;
-            assertThatThrownBy(() -> csv("table_1.csv").into(table))
-                .hasMessage("table must not be null");
-        }
-
-        @Test
-        void charset_charset_is_null() {
-            Charset charset = null;
-            assertThatThrownBy(() -> csv("table_1.csv")
-                .withCharset(charset))
-                .hasMessage("charset must not be null");
-        }
-
-        @Test
-        void string_charset_is_null() {
-            String charset = null;
-            assertThatThrownBy(() -> csv("table_1.csv")
-                .withCharset(charset))
-                .hasMessage("charset must not be null");
-        }
-
-        @Test
-        void default_value_column_is_null() {
-            String column = null;
-            Object value = new Object();
-            assertThatThrownBy(() -> csv("table_1.csv")
-                .withDefaultValue(column, value))
-                .hasMessage("column must not be null");
-        }
-
-        @Test
-        void value_generator_column_is_null() {
-            String column = null;
-            ValueGenerator<?> valueGenerator = ValueGenerators.sequence();
-            assertThatThrownBy(() -> csv("table_1.csv")
-                .withGeneratedValue(column, valueGenerator))
-                .hasMessage("column must not be null");
-        }
-
-        @Test
-        void value_generator_generator_is_null() {
-            String column = "column";
-            ValueGenerator<?> valueGenerator = null;
-            assertThatThrownBy(() -> csv("table_1.csv")
-                .withGeneratedValue(column, valueGenerator))
-                .hasMessage("valueGenerator must not be null");
-        }
-
-        @Test
-        void collection_header_is_null() {
-            Collection<String> headers = null;
-            assertThatThrownBy(() -> csv("table_1.csv")
-                .withHeader(headers))
-                .hasMessage("headers must not be null");
-        }
-
-        @Test
-        void collection_header_contains_null() {
-            Collection<String> headers = Arrays.asList("a", null);
-            assertThatThrownBy(() -> csv("table_1.csv")
-                .withHeader(headers))
-                .hasMessage("headers must not contain null");
-        }
-
-        @Test
-        void array_header_is_null() {
-            String[] headers = null;
-            assertThatThrownBy(() -> csv("table_1.csv")
-                .withHeader(headers))
-                .hasMessage("headers must not be null");
-        }
-
-        @Test
-        void array_header_contains_null() {
-            String[] headers = {"a", null};
-            assertThatThrownBy(() -> csv("table_1.csv")
-                .withHeader(headers))
-                .hasMessage("headers must not contain null");
-        }
-
-        @Test
-        void nullString_is_null() {
-            String nullString = null;
-            assertThatThrownBy(() -> csv("table_1.csv")
-                .withNullAs(nullString))
-                .hasMessage("nullString must not be null");
-        }
+    @Test
+    void specify_charset_as_string_explicitly() {
+      var changes = new Changes(source).setStartPointNow();
+      var operation = csv("WithCharset/cp932.csv").into("with_charset")
+          .withCharset("CP932").build();
+      new DbSetup(destination, operation).launch();
+      assertThat(changes.setEndPointNow())
+          .hasNumberOfChanges(1)
+          .changeOfCreation()
+          .rowAtEndPoint()
+          .value("id").isEqualTo(1)
+          .value("name").isEqualTo("田中　太郎");
     }
+
+    @Test
+    void throw_npe_if_charset_is_null() {
+      assertThatThrownBy(() -> csv("WithCharset/utf8.csv").into("with_charset")
+          .withCharset((Charset) null))
+          .isInstanceOf(NullPointerException.class)
+          .hasMessage("charset must not be null");
+    }
+
+    @Test
+    void throw_npe_if_string_charset_is_null() {
+      assertThatThrownBy(() -> csv("WithCharset/utf8.csv").into("with_charset")
+          .withCharset((String) null))
+          .isInstanceOf(NullPointerException.class)
+          .hasMessage("charset must not be null");
+    }
+  }
+
+  @Nested
+  class WithDelimiter {
+
+    @BeforeEach
+    void setUp() {
+      var ddl = sql("create table if not exists with_delimiter ("
+          + "id integer primary key,"
+          + "name varchar(100)"
+          + ")");
+      new DbSetup(destination, sequenceOf(ddl, truncate("with_delimiter"))).launch();
+    }
+
+    @Test
+    void use_comma_if_not_specified() {
+      var changes = new Changes(source).setStartPointNow();
+      var operation = csv("WithDelimiter/with_delimiter.csv").build();
+      new DbSetup(destination, operation).launch();
+      assertThat(changes.setEndPointNow())
+          .hasNumberOfChanges(1)
+          .changeOfCreation()
+          .rowAtEndPoint()
+          .value("id").isEqualTo(1)
+          .value("name").isEqualTo("Alice");
+    }
+
+    @Test
+    void specify_delimiter_explicitly() {
+      var changes = new Changes(source).setStartPointNow();
+      var operation = csv("WithDelimiter/with_delimiter.tsv")
+          .withDelimiter('\t').build();
+      new DbSetup(destination, operation).launch();
+      assertThat(changes.setEndPointNow())
+          .hasNumberOfChanges(1)
+          .changeOfCreation()
+          .rowAtEndPoint()
+          .value("id").isEqualTo(1)
+          .value("name").isEqualTo("Alice");
+    }
+  }
+
+  @Nested
+  class WithHeader {
+
+    @BeforeEach
+    void setUp() {
+      var ddl = sql("create table if not exists with_header ("
+          + "id integer primary key,"
+          + "name varchar(100)"
+          + ")");
+      new DbSetup(destination, sequenceOf(ddl, truncate("with_header"))).launch();
+    }
+
+    @Test
+    void use_first_row_of_file_if_not_specified() {
+      var changes = new Changes(source).setStartPointNow();
+      var operation = csv("WithHeader/with_header.csv")
+          .into("with_header").build();
+      new DbSetup(destination, operation).launch();
+      assertThat(changes.setEndPointNow())
+          .hasNumberOfChanges(1)
+          .changeOfCreation()
+          .rowAtEndPoint()
+          .value("id").isEqualTo(1)
+          .value("name").isEqualTo("Alice");
+    }
+
+    @Test
+    void specify_header_as_array_explicitly() {
+      var changes = new Changes(source).setStartPointNow();
+      var operation = csv("WithHeader/without_header.csv")
+          .into("with_header")
+          .withHeader("id", "name")
+          .build();
+      new DbSetup(destination, operation).launch();
+      assertThat(changes.setEndPointNow())
+          .hasNumberOfChanges(1)
+          .changeOfCreation()
+          .rowAtEndPoint()
+          .value("id").isEqualTo(1)
+          .value("name").isEqualTo("Alice");
+    }
+
+    @Test
+    void specify_header_as_list_explicitly() {
+      var changes = new Changes(source).setStartPointNow();
+      var operation = csv("WithHeader/without_header.csv")
+          .into("with_header")
+          .withHeader(List.of("id", "name"))
+          .build();
+      new DbSetup(destination, operation).launch();
+      assertThat(changes.setEndPointNow())
+          .hasNumberOfChanges(1)
+          .changeOfCreation()
+          .rowAtEndPoint()
+          .value("id").isEqualTo(1)
+          .value("name").isEqualTo("Alice");
+    }
+
+    @Test
+    void throw_npe_if_array_header_is_null() {
+      assertThatThrownBy(() -> csv("WithHeader/without_header.csv")
+          .into("with_header")
+          .withHeader((String[]) null))
+          .isInstanceOf(NullPointerException.class)
+          .hasMessage("headers must not be null");
+    }
+
+    @Test
+    void throw_npe_if_array_header_contains_null() {
+      assertThatThrownBy(() -> csv("WithHeader/without_header.csv")
+          .into("with_header")
+          .withHeader("id", null))
+          .isInstanceOf(NullPointerException.class)
+          .hasMessage("headers must not contain null");
+    }
+
+    @Test
+    void throw_npe_if_collection_header_is_null() {
+      assertThatThrownBy(() -> csv("WithHeader/without_header.csv")
+          .into("with_header")
+          .withHeader((Collection<String>) null))
+          .isInstanceOf(NullPointerException.class)
+          .hasMessage("headers must not be null");
+    }
+
+    @Test
+    void throw_npe_if_collection_header_contains_null() {
+      var headers = new ArrayList<String>();
+      headers.add("id");
+      headers.add(null);
+      assertThatThrownBy(() -> csv("WithHeader/without_header.csv")
+          .into("with_header")
+          .withHeader(headers))
+          .isInstanceOf(NullPointerException.class)
+          .hasMessage("headers must not contain null");
+    }
+  }
+
+  @Nested
+  class WithNullAs {
+
+    @BeforeEach
+    void setUp() {
+      var ddl = sql("create table if not exists with_null_as ("
+          + "id integer primary key,"
+          + "name char(4)"
+          + ")");
+      new DbSetup(destination, sequenceOf(ddl, truncate("with_null_as"))).launch();
+    }
+
+    @Test
+    void treat_empty_as_null_if_not_specified() {
+      var changes = new Changes(source).setStartPointNow();
+      var operation = csv("WithNullAs/with_null_as.csv").build();
+      new DbSetup(destination, operation).launch();
+      assertThat(changes.setEndPointNow())
+          .hasNumberOfChanges(2)
+          .changeOfCreation()
+          .rowAtEndPoint()
+          .value("id").isEqualTo(1)
+          .value("name").isNull()
+          .changeOfCreation()
+          .rowAtEndPoint()
+          .value("id").isEqualTo(2)
+          .value("name").isEqualTo("NULL");
+    }
+
+    @Test
+    void specify_null_string_explicitly() {
+      var changes = new Changes(source).setStartPointNow();
+      var operation = csv("WithNullAs/with_null_as.csv")
+          .withNullAs("NULL").build();
+      new DbSetup(destination, operation).launch();
+      assertThat(changes.setEndPointNow())
+          .hasNumberOfChanges(2)
+          .changeOfCreation()
+          .rowAtEndPoint()
+          .value("id").isEqualTo(1)
+          .value("name").isEqualTo("    ")
+          .changeOfCreation()
+          .rowAtEndPoint()
+          .value("id").isEqualTo(2)
+          .value("name").isNull();
+    }
+
+    @Test
+    void throw_npe_if_null_string_is_null() {
+      assertThatThrownBy(() -> csv("WithNullAs/with_null_as.csv")
+          .withNullAs(null))
+          .isInstanceOf(NullPointerException.class)
+          .hasMessage("nullString must not be null");
+    }
+  }
+
+  @Nested
+  class WithQuote {
+
+    @BeforeEach
+    void setUp() {
+      var ddl = sql("create table if not exists with_quote ("
+          + "id integer primary key,"
+          + "name1 varchar(100),"
+          + "name2 varchar(100),"
+          + "name3 varchar(100)"
+          + ")");
+      new DbSetup(destination, sequenceOf(ddl, truncate("with_quote"))).launch();
+    }
+
+    @Test
+    void use_double_quote_if_not_specified() {
+      var changes = new Changes(source).setStartPointNow();
+      var operation = csv("WithQuote/with_double_quote.csv").into("with_quote").build();
+      new DbSetup(destination, operation).launch();
+      assertThat(changes.setEndPointNow())
+          .hasNumberOfChanges(1)
+          .changeOfCreation()
+          .rowAtEndPoint()
+          .value("id").isEqualTo(1)
+          .value("name1").isEqualTo("Hello, World!")
+          .value("name2").isEqualTo("foo")
+          .value("name3").isEqualTo("'bar'");
+    }
+
+    @Test
+    void specify_single_quote_explicitly() {
+      var changes = new Changes(source).setStartPointNow();
+      var operation = csv("WithQuote/with_single_quote.csv").into("with_quote")
+          .withQuote('\'')
+          .build();
+      new DbSetup(destination, operation).launch();
+      assertThat(changes.setEndPointNow())
+          .hasNumberOfChanges(1)
+          .changeOfCreation()
+          .rowAtEndPoint()
+          .value("id").isEqualTo(1)
+          .value("name1").isEqualTo("Hello, World!")
+          .value("name2").isEqualTo("\"foo\"")
+          .value("name3").isEqualTo("bar");
+    }
+  }
+
+  @Nested
+  class WithDefaultValue {
+
+    @BeforeEach
+    void setUp() {
+      var ddl = sql("create table if not exists with_default_value ("
+          + "id integer primary key,"
+          + "name varchar(100)"
+          + ")");
+      new DbSetup(destination, sequenceOf(ddl, truncate("with_default_value"))).launch();
+    }
+
+    @Test
+    void specify_default_value() {
+      var changes = new Changes(source).setStartPointNow();
+      var operation = csv("WithDefaultValue/with_default_value.csv")
+          .withDefaultValue("name", "DEFAULT")
+          .build();
+      new DbSetup(destination, operation).launch();
+      assertThat(changes.setEndPointNow())
+          .hasNumberOfChanges(2)
+          .changeOfCreation()
+          .rowAtEndPoint()
+          .value("id").isEqualTo(1)
+          .value("name").isEqualTo("DEFAULT")
+          .changeOfCreation()
+          .rowAtEndPoint()
+          .value("id").isEqualTo(2)
+          .value("name").isEqualTo("DEFAULT");
+    }
+
+    @Test
+    void throw_npe_if_column_name_is_null() {
+      assertThatThrownBy(() -> csv("WithDefaultValue/with_default_value.csv")
+          .withDefaultValue(null, "DEFAULT"))
+          .isInstanceOf(NullPointerException.class)
+          .hasMessage("column must not be null");
+    }
+  }
+
+  @Nested
+  class WithGeneratedValue {
+
+    @BeforeEach
+    void setUp() {
+      var ddl = sql("create table if not exists with_generated_value ("
+          + "id integer primary key,"
+          + "name varchar(100)"
+          + ")");
+      new DbSetup(destination, sequenceOf(ddl, truncate("with_generated_value"))).launch();
+    }
+
+    @Test
+    void specify_value_generator() {
+      var changes = new Changes(source).setStartPointNow();
+      var operation = csv("WithGeneratedValue/with_generated_value.csv")
+          .withGeneratedValue("id", ValueGenerators.sequence().startingAt(10).incrementingBy(10))
+          .build();
+      new DbSetup(destination, operation).launch();
+      assertThat(changes.setEndPointNow())
+          .hasNumberOfChanges(2)
+          .changeOfCreation()
+          .rowAtEndPoint()
+          .value("id").isEqualTo(10)
+          .value("name").isEqualTo("foo")
+          .changeOfCreation()
+          .rowAtEndPoint()
+          .value("id").isEqualTo(20)
+          .value("name").isEqualTo("bar");
+    }
+
+    @Test
+    void throw_npe_if_column_name_is_null() {
+      assertThatThrownBy(() -> csv("WithGeneratedValue/with_generated_value.csv")
+          .withGeneratedValue(null, ValueGenerators.sequence()))
+          .isInstanceOf(NullPointerException.class)
+          .hasMessage("column must not be null");
+    }
+
+    @Test
+    void throw_npe_if_value_generator_is_null() {
+      assertThatThrownBy(() -> csv("WithGeneratedValue/with_generated_value.csv")
+          .withGeneratedValue("id", null))
+          .isInstanceOf(NullPointerException.class)
+          .hasMessage("valueGenerator must not be null");
+    }
+  }
 }

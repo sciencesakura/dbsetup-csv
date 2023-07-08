@@ -24,7 +24,6 @@
 package com.sciencesakura.dbsetup.csv
 
 import com.ninja_squad.dbsetup.destination.DriverManagerDestination
-import com.ninja_squad.dbsetup.generator.ValueGenerators
 import com.ninja_squad.dbsetup_kotlin.dbSetup
 import org.assertj.db.api.Assertions.assertThat
 import org.assertj.db.type.Changes
@@ -32,26 +31,27 @@ import org.assertj.db.type.Source
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
-private const val url = "jdbc:h2:mem:test;DB_CLOSE_DELAY=-1"
-private const val username = "sa"
-private val source = Source(url, username, null)
-private val destination = DriverManagerDestination(url, username, null)
-private val setUpQueries = arrayOf(
-    "drop table if exists kt_table_1 cascade",
-    """
-    create table kt_table_1 (
-      a integer primary key,
-      b integer
-    )
-    """,
-)
-
 class CsvTest {
+
+    val url = "jdbc:h2:mem:test;DB_CLOSE_DELAY=-1"
+
+    val username = "sa"
+
+    val source = Source(url, username, null)
+
+    val destination = DriverManagerDestination.with(url, username, null)
 
     @BeforeEach
     fun setUp() {
+        val ddl = """
+            create table if not exists kt_test (
+              id integer primary key,
+              name varchar(100)
+            )
+        """.trimIndent()
         dbSetup(destination) {
-            sql(*setUpQueries)
+            sql(ddl)
+            truncate("kt_test")
         }.launch()
     }
 
@@ -59,38 +59,29 @@ class CsvTest {
     fun import_csv() {
         val changes = Changes(source).setStartPointNow()
         dbSetup(destination) {
-            csv("kt_table_1.csv")
+            csv("kt_test.csv")
         }.launch()
-        changes.setEndPointNow()
-        assertThat(changes).hasNumberOfChanges(2)
+        assertThat(changes.setEndPointNow())
+            .hasNumberOfChanges(1)
             .changeOfCreation()
             .rowAtEndPoint()
-            .value("a").isEqualTo(10)
-            .value("b").isEqualTo(100)
-            .changeOfCreation()
-            .rowAtEndPoint()
-            .value("a").isEqualTo(20)
-            .value("b").isEqualTo(200)
+            .value("id").isEqualTo(1)
+            .value("name").isEqualTo("foo")
     }
 
     @Test
     fun import_csv_with_configure() {
         val changes = Changes(source).setStartPointNow()
         dbSetup(destination) {
-            csv("kt_table_1_generators.csv") {
-                into("kt_table_1")
-                withGeneratedValue("a", ValueGenerators.sequence())
+            csv("kt_test.tsv") {
+                withDelimiter('\t')
             }
         }.launch()
-        changes.setEndPointNow()
-        assertThat(changes).hasNumberOfChanges(2)
+        assertThat(changes.setEndPointNow())
+            .hasNumberOfChanges(1)
             .changeOfCreation()
             .rowAtEndPoint()
-            .value("a").isEqualTo(1)
-            .value("b").isEqualTo(100)
-            .changeOfCreation()
-            .rowAtEndPoint()
-            .value("a").isEqualTo(2)
-            .value("b").isEqualTo(200)
+            .value("id").isEqualTo(1)
+            .value("name").isEqualTo("foo")
     }
 }
