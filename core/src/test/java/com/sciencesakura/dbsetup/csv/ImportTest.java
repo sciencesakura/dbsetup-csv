@@ -45,8 +45,9 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
+import org.assertj.db.type.AssertDbConnection;
+import org.assertj.db.type.AssertDbConnectionFactory;
 import org.assertj.db.type.Changes;
-import org.assertj.db.type.Source;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -57,18 +58,20 @@ class ImportTest {
 
   static final String username = "sa";
 
-  Source source;
+  AssertDbConnection connection;
 
   Destination destination;
 
   @BeforeEach
   void setUp() {
-    source = new Source(url, username, null);
+    connection = AssertDbConnectionFactory.of(url, username, null).create();
     destination = new DriverManagerDestination(url, username, null);
   }
 
   @Nested
   class DataTypes {
+
+    Changes changes;
 
     @BeforeEach
     void setUp() {
@@ -88,11 +91,12 @@ class ImportTest {
           + "primary key (id)"
           + ")");
       new DbSetup(destination, sequenceOf(ddl, truncate("data_types"))).launch();
+      changes = connection.changes().table("data_types").build();
     }
 
     @Test
     void import_with_default_settings() {
-      var changes = new Changes(source).setStartPointNow();
+      changes.setStartPointNow();
       var operation = csv("DataTypes/data_types.csv").build();
       new DbSetup(destination, operation).launch();
       assertThat(changes.setEndPointNow())
@@ -149,6 +153,8 @@ class ImportTest {
   @Nested
   class IntoTable {
 
+    Changes changes;
+
     @BeforeEach
     void setUp() {
       var ddl = sql("create table if not exists into_table ("
@@ -156,11 +162,12 @@ class ImportTest {
           + "name varchar(100)"
           + ")");
       new DbSetup(destination, sequenceOf(ddl, truncate("into_table"))).launch();
+      changes = connection.changes().table("into_table").build();
     }
 
     @Test
     void resolve_table_name_from_file_name() {
-      var changes = new Changes(source).setStartPointNow();
+      changes.setStartPointNow();
       var operation = csv("IntoTable/into_table.csv").build();
       new DbSetup(destination, operation).launch();
       assertThat(changes.setEndPointNow())
@@ -173,7 +180,7 @@ class ImportTest {
 
     @Test
     void specify_table_name_explicitly() {
-      var changes = new Changes(source).setStartPointNow();
+      changes.setStartPointNow();
       var operation = csv("IntoTable/into_table_2.csv").into("into_table").build();
       new DbSetup(destination, operation).launch();
       assertThat(changes.setEndPointNow())
@@ -195,6 +202,8 @@ class ImportTest {
   @Nested
   class WithCharset {
 
+    Changes changes;
+
     @BeforeEach
     void setUp() {
       var ddl = sql("create table if not exists with_charset ("
@@ -202,11 +211,12 @@ class ImportTest {
           + "name varchar(100)"
           + ")");
       new DbSetup(destination, sequenceOf(ddl, truncate("with_charset"))).launch();
+      changes = connection.changes().table("with_charset").build();
     }
 
     @Test
     void use_utf8_if_not_specified() {
-      var changes = new Changes(source).setStartPointNow();
+      changes.setStartPointNow();
       var operation = csv("WithCharset/utf8.csv").into("with_charset").build();
       new DbSetup(destination, operation).launch();
       assertThat(changes.setEndPointNow())
@@ -219,7 +229,7 @@ class ImportTest {
 
     @Test
     void specify_charset_explicitly() {
-      var changes = new Changes(source).setStartPointNow();
+      changes.setStartPointNow();
       var operation = csv("WithCharset/utf16.csv").into("with_charset")
           .withCharset(StandardCharsets.UTF_16).build();
       new DbSetup(destination, operation).launch();
@@ -233,7 +243,7 @@ class ImportTest {
 
     @Test
     void specify_charset_as_string_explicitly() {
-      var changes = new Changes(source).setStartPointNow();
+      changes.setStartPointNow();
       var operation = csv("WithCharset/cp932.csv").into("with_charset")
           .withCharset("CP932").build();
       new DbSetup(destination, operation).launch();
@@ -265,6 +275,8 @@ class ImportTest {
   @Nested
   class WithDelimiter {
 
+    Changes changes;
+
     @BeforeEach
     void setUp() {
       var ddl = sql("create table if not exists with_delimiter ("
@@ -272,11 +284,12 @@ class ImportTest {
           + "name varchar(100)"
           + ")");
       new DbSetup(destination, sequenceOf(ddl, truncate("with_delimiter"))).launch();
+      changes = connection.changes().table("with_delimiter").build();
     }
 
     @Test
     void use_comma_if_not_specified() {
-      var changes = new Changes(source).setStartPointNow();
+      changes.setStartPointNow();
       var operation = csv("WithDelimiter/with_delimiter.csv").build();
       new DbSetup(destination, operation).launch();
       assertThat(changes.setEndPointNow())
@@ -289,7 +302,7 @@ class ImportTest {
 
     @Test
     void specify_delimiter_explicitly() {
-      var changes = new Changes(source).setStartPointNow();
+      changes.setStartPointNow();
       var operation = csv("WithDelimiter/with_delimiter.tsv")
           .withDelimiter('\t').build();
       new DbSetup(destination, operation).launch();
@@ -305,6 +318,8 @@ class ImportTest {
   @Nested
   class WithHeader {
 
+    Changes changes;
+
     @BeforeEach
     void setUp() {
       var ddl = sql("create table if not exists with_header ("
@@ -312,11 +327,12 @@ class ImportTest {
           + "name varchar(100)"
           + ")");
       new DbSetup(destination, sequenceOf(ddl, truncate("with_header"))).launch();
+      changes = connection.changes().table("with_header").build();
     }
 
     @Test
     void use_first_row_of_file_if_not_specified() {
-      var changes = new Changes(source).setStartPointNow();
+      changes.setStartPointNow();
       var operation = csv("WithHeader/with_header.csv")
           .into("with_header").build();
       new DbSetup(destination, operation).launch();
@@ -330,7 +346,7 @@ class ImportTest {
 
     @Test
     void specify_header_as_array_explicitly() {
-      var changes = new Changes(source).setStartPointNow();
+      changes.setStartPointNow();
       var operation = csv("WithHeader/without_header.csv")
           .into("with_header")
           .withHeader("id", "name")
@@ -346,7 +362,7 @@ class ImportTest {
 
     @Test
     void specify_header_as_list_explicitly() {
-      var changes = new Changes(source).setStartPointNow();
+      changes.setStartPointNow();
       var operation = csv("WithHeader/without_header.csv")
           .into("with_header")
           .withHeader(List.of("id", "name"))
@@ -403,6 +419,8 @@ class ImportTest {
   @Nested
   class WithNullAs {
 
+    Changes changes;
+
     @BeforeEach
     void setUp() {
       var ddl = sql("create table if not exists with_null_as ("
@@ -410,11 +428,12 @@ class ImportTest {
           + "name char(4)"
           + ")");
       new DbSetup(destination, sequenceOf(ddl, truncate("with_null_as"))).launch();
+      changes = connection.changes().table("with_null_as").build();
     }
 
     @Test
     void treat_empty_as_null_if_not_specified() {
-      var changes = new Changes(source).setStartPointNow();
+      changes.setStartPointNow();
       var operation = csv("WithNullAs/with_null_as.csv").build();
       new DbSetup(destination, operation).launch();
       assertThat(changes.setEndPointNow())
@@ -431,7 +450,7 @@ class ImportTest {
 
     @Test
     void specify_null_string_explicitly() {
-      var changes = new Changes(source).setStartPointNow();
+      changes.setStartPointNow();
       var operation = csv("WithNullAs/with_null_as.csv")
           .withNullAs("NULL").build();
       new DbSetup(destination, operation).launch();
@@ -459,6 +478,8 @@ class ImportTest {
   @Nested
   class WithQuote {
 
+    Changes changes;
+
     @BeforeEach
     void setUp() {
       var ddl = sql("create table if not exists with_quote ("
@@ -468,11 +489,12 @@ class ImportTest {
           + "name3 varchar(100)"
           + ")");
       new DbSetup(destination, sequenceOf(ddl, truncate("with_quote"))).launch();
+      changes = connection.changes().table("with_quote").build();
     }
 
     @Test
     void use_double_quote_if_not_specified() {
-      var changes = new Changes(source).setStartPointNow();
+      changes.setStartPointNow();
       var operation = csv("WithQuote/with_double_quote.csv").into("with_quote").build();
       new DbSetup(destination, operation).launch();
       assertThat(changes.setEndPointNow())
@@ -487,7 +509,7 @@ class ImportTest {
 
     @Test
     void specify_single_quote_explicitly() {
-      var changes = new Changes(source).setStartPointNow();
+      changes.setStartPointNow();
       var operation = csv("WithQuote/with_single_quote.csv").into("with_quote")
           .withQuote('\'')
           .build();
@@ -506,6 +528,8 @@ class ImportTest {
   @Nested
   class WithDefaultValue {
 
+    Changes changes;
+
     @BeforeEach
     void setUp() {
       var ddl = sql("create table if not exists with_default_value ("
@@ -513,11 +537,12 @@ class ImportTest {
           + "name varchar(100)"
           + ")");
       new DbSetup(destination, sequenceOf(ddl, truncate("with_default_value"))).launch();
+      changes = connection.changes().table("with_default_value").build();
     }
 
     @Test
     void specify_default_value() {
-      var changes = new Changes(source).setStartPointNow();
+      changes.setStartPointNow();
       var operation = csv("WithDefaultValue/with_default_value.csv")
           .withDefaultValue("name", "DEFAULT")
           .build();
@@ -546,6 +571,8 @@ class ImportTest {
   @Nested
   class WithGeneratedValue {
 
+    Changes changes;
+
     @BeforeEach
     void setUp() {
       var ddl = sql("create table if not exists with_generated_value ("
@@ -553,11 +580,12 @@ class ImportTest {
           + "name varchar(100)"
           + ")");
       new DbSetup(destination, sequenceOf(ddl, truncate("with_generated_value"))).launch();
+      changes = connection.changes().table("with_generated_value").build();
     }
 
     @Test
     void specify_value_generator() {
-      var changes = new Changes(source).setStartPointNow();
+      changes.setStartPointNow();
       var operation = csv("WithGeneratedValue/with_generated_value.csv")
           .withGeneratedValue("id", ValueGenerators.sequence().startingAt(10).incrementingBy(10))
           .build();
