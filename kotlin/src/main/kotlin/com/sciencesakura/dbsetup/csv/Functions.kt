@@ -32,7 +32,7 @@ import com.ninja_squad.dbsetup_kotlin.DbSetupBuilder
  * @throws IllegalArgumentException if the source file was not found
  */
 fun DbSetupBuilder.csv(location: String) {
-    this.execute(Import.csv(location).build())
+  this.execute(Import.csv(location).build())
 }
 
 /**
@@ -42,8 +42,11 @@ fun DbSetupBuilder.csv(location: String) {
  * @param configure the function used to configure the CSV import
  * @throws IllegalArgumentException if the source file was not found
  */
-fun DbSetupBuilder.csv(location: String, configure: Import.Builder.() -> Unit) {
-    val builder = Import.csv(location)
-    builder.configure()
-    this.execute(builder.build())
+fun DbSetupBuilder.csv(
+  location: String,
+  configure: Import.Builder.() -> Unit,
+) {
+  val builder = Import.csv(location)
+  builder.configure()
+  this.execute(builder.build())
 }

@@ -103,7 +103,7 @@ public final class Import implements Operation {
         } else {
             fb.setHeader(builder.headers);
         }
-        return fb.build();
+        return fb.get();
     }
 
     private final Operation internalOperation;
@@ -275,7 +275,7 @@ public final class Import implements Operation {
          * @param headers the header names
          * @return the reference to this object
          */
-        public Builder withHeader(@NotNull Collection<@NotNull String> headers) {
+        public Builder withHeader(@NotNull Collection<String> headers) {
             requireNonNull(headers, "headers must not be null");
             this.headers = new String[headers.size()];
             int i = 0;

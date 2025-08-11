@@ -1,30 +1,24 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0"
-  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
     <groupId>com.sciencesakura</groupId>
     <artifactId>dbsetup-csv-parent</artifactId>
-    <version>3.0.0</version>
+    <version>3.0.1-SNAPSHOT</version>
   </parent>
   <artifactId>dbsetup-csv-kt</artifactId>
   <packaging>jar</packaging>
 
   <name>dbsetup-csv-kt</name>
+  <url>https://github.com/sciencesakura/dbsetup-csv</url>
 
   <dependencies>
     <dependency>
       <groupId>com.ninja-squad</groupId>
       <artifactId>DbSetup-kotlin</artifactId>
-      <version>2.1.0</version>
-      <exclusions>
-        <exclusion>
-          <groupId>org.jetbrains.kotlin</groupId>
-          <artifactId>kotlin-stdlib</artifactId>
-        </exclusion>
-      </exclusions>
     </dependency>
     <dependency>
       <groupId>com.sciencesakura</groupId>
@@ -34,7 +28,6 @@
     <dependency>
       <groupId>org.jetbrains.kotlin</groupId>
       <artifactId>kotlin-stdlib</artifactId>
-      <version>${kotlin.version}</version>
     </dependency>
 
     <dependency>
@@ -59,6 +52,7 @@
     <testSourceDirectory>${project.basedir}/src/test/kotlin</testSourceDirectory>
     <plugins>
       <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-jar-plugin</artifactId>
         <configuration>
           <archive>
@@ -69,6 +63,7 @@
         </configuration>
       </plugin>
       <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-source-plugin</artifactId>
       </plugin>
       <plugin>
