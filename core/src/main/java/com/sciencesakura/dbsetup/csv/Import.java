@@ -26,25 +26,17 @@ import org.apache.commons.csv.CSVParser;
 import org.jetbrains.annotations.NotNull;
 
 /**
- * An operation which imports the CSV file into the specified table.
+ * An operation which imports the CSV file into the database.
  *
- * <h2>Usage</h2>
  * <p>We recommend to import {@code csv} method statically so that your code looks clearer.</p>
- * <pre>
- * {@code import static com.sciencesakura.dbsetup.csv.Import.csv;}
- * </pre>
+ * <pre>{@code import static com.sciencesakura.dbsetup.csv.Import.csv;}</pre>
+ *
  * <p>Then you can use {@code csv} method as follows:</p>
- * <pre>
- * {@code @BeforeEach
- * void setUp() {
- *   var operations = sequenceOf(
- *     truncate("my_table"),
- *     csv("testdata.csv").into("my_table").build());
- *   var dbSetup = new DbSetup(destination, operations);
- *   dbSetup.launch();
- * }
- * }
- * </pre>
+ * <pre>{@code
+ * var operation = csv("test-items.csv").into("items").build();
+ * var dbSetup = new DbSetup(destination, operation);
+ * dbSetup.launch();
+ * }</pre>
  *
  * @author sciencesakura
  */
@@ -52,13 +44,10 @@ public final class Import implements Operation {
 
   /**
    * Creates a new {@code Import.Builder} instance.
-   * <p>
-   * The specified location string must be the relative path string from classpath root.
-   * </p>
    *
-   * @param location the location of the source file that is the relative path from classpath root
+   * @param location the {@code /}-separated path from classpath root to the CSV file
    * @return the new {@code Import.Builder} instance
-   * @throws IllegalArgumentException if the source file was not found
+   * @throws IllegalArgumentException if the CSV file is not found
    */
   @NotNull
   public static Builder csv(@NotNull String location) {
@@ -99,24 +88,59 @@ public final class Import implements Operation {
     internalOperation = ib.build();
   }
 
+  /**
+   * {@inheritDoc}
+   */
   @Override
   public void execute(Connection connection, BinderConfiguration configuration) throws SQLException {
     internalOperation.execute(connection, configuration);
   }
 
   /**
-   * A builder to create the {@code Import} instance.
-   *
-   * <h2>Usage</h2>
-   * <p>The default settings are:</p>
-   * <ul>
-   *   <li>{@code withCharset("UTF-8")}</li>
-   *   <li>{@code withDelimiter(',')}</li>
-   *   <li>{@code withNullAs("")}</li>
-   *   <li>{@code withQuote('"')}</li>
-   *   <li>The source file name excluding extension is used as the table name.</li>
-   *   <li>The first row of the source file is treated as the header row.</li>
-   * </ul>
+   * A builder to create the {@code Import} operation.
+   * The builder instance is created by the static method {@link Import#csv(String)}.
+   * <table class="striped">
+   *   <caption>Settings</caption>
+   *   <thead>
+   *     <tr>
+   *       <th>Property</th>
+   *       <th>Default Value</th>
+   *       <th>To Customize</th>
+   *     </tr>
+   *   </thead>
+   *   <tbody>
+   *     <tr>
+   *       <th>Table for import</th>
+   *       <td>CSV file name without extension</td>
+   *       <td>{@link #into(String)}</td>
+   *     </tr>
+   *     <tr>
+   *       <th>CSV file encoding</th>
+   *       <td>UTF-8</td>
+   *       <td>{@link #withCharset(Charset)} or {@link #withCharset(String)}</td>
+   *     </tr>
+   *     <tr>
+   *       <th>CSV delimiter</th>
+   *       <td>{@code ,} (comma)</td>
+   *       <td>{@link #withDelimiter(char)}</td>
+   *     </tr>
+   *     <tr>
+   *       <th>CSV header</th>
+   *       <td>First row of the CSV file</td>
+   *       <td>{@link #withHeader(Collection)} or {@link #withHeader(String...)}</td>
+   *     </tr>
+   *     <tr>
+   *       <th>Representation of null value</th>
+   *       <td>Empty string</td>
+   *       <td>{@link #withNullAs(String)}</td>
+   *     </tr>
+   *     <tr>
+   *       <th>CSV quotation mark</th>
+   *       <td>{@code "} (double quote)</td>
+   *       <td>{@link #withQuote(char)}</td>
+   *     </tr>
+   *   </tbody>
+   * </table>
    *
    * @author sciencesakura
    */
@@ -147,7 +171,7 @@ public final class Import implements Operation {
     }
 
     /**
-     * Build a new {@code Import} instance.
+     * Build a new {@code Import} operation instance.
      *
      * @return the new {@code Import} instance
      */
@@ -161,12 +185,10 @@ public final class Import implements Operation {
     }
 
     /**
-     * Specifies a table name to insert into.
-     * <p>
-     * By default the name of source file (without extension) is used.
-     * </p>
+     * Specifies a table name to import the CSV file.
+     * By default, the table name is derived from the CSV file name without extension.
      *
-     * @param table the table name
+     * @param table the table name to import the CSV file
      * @return the reference to this object
      */
     public Builder into(@NotNull String table) {
@@ -175,12 +197,11 @@ public final class Import implements Operation {
     }
 
     /**
-     * Specifies a charset of the source file.
-     * <p>
-     * By default UTF-8 is used.
-     * </p>
+     * Specifies a character encoding to read the CSV file.
      *
-     * @param charset the charset
+     * <p>By default, the encoding is {@code UTF-8}.</p>
+     *
+     * @param charset the character encoding to read the CSV file
      * @return the reference to this object
      */
     public Builder withCharset(@NotNull Charset charset) {
@@ -189,12 +210,11 @@ public final class Import implements Operation {
     }
 
     /**
-     * Specifies a charset of the source file.
-     * <p>
-     * By default UTF-8 is used.
-     * </p>
+     * Specifies a character encoding to read the CSV file.
      *
-     * @param charset the charset name
+     * <p>By default, the encoding is {@code UTF-8}.</p>
+     *
+     * @param charset the character encoding to read the CSV file
      * @return the reference to this object
      */
     public Builder withCharset(@NotNull String charset) {
@@ -206,8 +226,8 @@ public final class Import implements Operation {
     /**
      * Specifies a default value for the given column.
      *
-     * @param column the column name
-     * @param value  the default value
+     * @param column the column name to set the default value
+     * @param value the default value (nullable)
      * @return the reference to this object
      */
     public Builder withDefaultValue(@NotNull String column, Object value) {
@@ -217,12 +237,11 @@ public final class Import implements Operation {
     }
 
     /**
-     * Specifies a delimiter character of the source file.
-     * <p>
-     * By default {@code ','} is used.
-     * </p>
+     * Specifies a delimiter to separate values in the CSV file.
      *
-     * @param delimiter the delimiter character
+     * <p>By default, the delimiter is {@code ,} (comma).</p>
+     *
+     * @param delimiter the delimiter
      * @return the reference to this object
      */
     public Builder withDelimiter(char delimiter) {
@@ -232,9 +251,10 @@ public final class Import implements Operation {
 
     /**
      * Specifies a value generator for the given column.
+     * The value generator is used to generate values for the column when inserting rows.
      *
-     * @param column         the column name
-     * @param valueGenerator the generator
+     * @param column the column name to set the value generator
+     * @param valueGenerator the value generator to use
      * @return the reference to this object
      */
     public Builder withGeneratedValue(@NotNull String column, @NotNull ValueGenerator<?> valueGenerator) {
@@ -245,12 +265,11 @@ public final class Import implements Operation {
     }
 
     /**
-     * Specifies headers of the source file.
-     * <p>
-     * By default the first row of the source file is used as header.
-     * </p>
+     * Specifies the headers of the CSV file.
      *
-     * @param headers the header names
+     * <p>By default, the first row of the CSV file is used as the header.</p>
+     *
+     * @param headers the headers of the CSV file
      * @return the reference to this object
      */
     public Builder withHeader(@NotNull Collection<String> headers) {
@@ -264,12 +283,11 @@ public final class Import implements Operation {
     }
 
     /**
-     * Specifies headers of the source file.
-     * <p>
-     * By default the first row of the source file is used as header.
-     * </p>
+     * Specifies the headers of the CSV file.
      *
-     * @param headers the header names
+     * <p>By default, the first row of the CSV file is used as the header.</p>
+     *
+     * @param headers the headers of the CSV file
      * @return the reference to this object
      */
     public Builder withHeader(@NotNull String... headers) {
@@ -283,12 +301,11 @@ public final class Import implements Operation {
     }
 
     /**
-     * Specifies a string that represents {@code null} value.
-     * <p>
-     * By default {@code ""} (empty string) is used.
-     * </p>
+     * Specifies a string to represent null values in the CSV file.
      *
-     * @param nullString the string that represents {@code null} value
+     * <p>By default, an empty string is used to represent null values.</p>
+     *
+     * @param nullString the string to represent null values
      * @return the reference to this object
      */
     public Builder withNullAs(@NotNull String nullString) {
@@ -297,10 +314,9 @@ public final class Import implements Operation {
     }
 
     /**
-     * Specifies a quotation mark of the source file.
-     * <p>
-     * By default {@code '"'} is used.
-     * </p>
+     * Specifies a quotation mark to enclose values in the CSV file.
+     *
+     * <p>By default, the quotation mark is {@code "} (double quote).</p>
      *
      * @param quote the quotation mark
      * @return the reference to this object

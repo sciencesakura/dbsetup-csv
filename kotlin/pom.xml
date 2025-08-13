@@ -82,6 +82,9 @@
         <groupId>org.jetbrains.dokka</groupId>
         <artifactId>dokka-maven-plugin</artifactId>
         <configuration>
+          <includes>
+            <include>${project.basedir}/module.md</include>
+          </includes>
           <outputDir>${project.basedir}/../docs/dokka</outputDir>
         </configuration>
       </plugin>

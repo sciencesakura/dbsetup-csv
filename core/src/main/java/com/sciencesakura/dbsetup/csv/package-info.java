@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
 /**
- * A package containing classes to import data from CSV/TSV files.
+ * This package contains classes for importing CSV files into a database.
  */
 package com.sciencesakura.dbsetup.csv;
