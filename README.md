@@ -1,10 +1,8 @@
-# dbsetup-csv: Import CSV using DbSetup
-
-[English](README.md) | [日本語](README.ja.md)
-
-A [DbSetup](http://dbsetup.ninja-squad.com/) extension to import data from CSV/TSV files.
+# dbsetup-csv: Import CSV into database with DbSetup
 
 ![](https://github.com/sciencesakura/dbsetup-csv/actions/workflows/check.yaml/badge.svg) [![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.sciencesakura/dbsetup-csv/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.sciencesakura/dbsetup-csv)
+
+A [DbSetup](http://dbsetup.ninja-squad.com/) extension for importing CSV files into the database.
 
 ## Requirements
 
@@ -12,23 +10,21 @@ A [DbSetup](http://dbsetup.ninja-squad.com/) extension to import data from CSV/T
 
 ## Installation
 
-### Gradle
+The dbsetup-csv library is available on Maven Central. You can install it using your build system of choice.
 
-#### Java
+### Gradle
 
 ```groovy
 testImplementation 'com.sciencesakura:dbsetup-csv:3.0.0'
 ```
 
-#### Kotlin
+If you are using Kotlin, you can use the Kotlin module for a more concise DSL:
 
 ```groovy
 testImplementation 'com.sciencesakura:dbsetup-csv-kt:3.0.0'
 ```
 
 ### Maven
-
-#### Java
 
 ```xml
 <dependency>
@@ -39,7 +35,7 @@ testImplementation 'com.sciencesakura:dbsetup-csv-kt:3.0.0'
 </dependency>
 ```
 
-#### Kotlin
+If you are using Kotlin, you can use the Kotlin module for a more concise DSL:
 
 ```xml
 <dependency>
@@ -52,46 +48,77 @@ testImplementation 'com.sciencesakura:dbsetup-csv-kt:3.0.0'
 
 ## Usage
 
-### Java
+### Import CSV/TSV file
 
 ```java
 import static com.sciencesakura.dbsetup.csv.Import.csv;
+import com.ninja_squad.dbsetup.DbSetup;
 
-@BeforeEach
-void setUp() {
-  var operations = sequenceOf(
-    truncate("my_table"),
-    // `testdata.csv` must be in classpath.
-    csv("testdata.csv").into("my_table").build());
-  var dbSetup = new DbSetup(destination, operations);
-  dbSetup.launch();
-}
+// The operation to import a CSV file into a table
+var operation = csv("test-items.csv").into("items").build();
+// when importing a TSV file:
+// var operation = csv("test-items.tsv").into("items").withDelimiter('\t').build();
+
+// Create a `DbSetup` instance with the operation and execute it
+var dbSetup = new DbSetup(destination, operation);
+dbSetup.launch();
 ```
 
-### Kotlin
+### Clear table before import
+
+```java
+import static com.ninja_squad.dbsetup.Operations.*;
+import static com.sciencesakura.dbsetup.csv.Import.csv;
+import com.ninja_squad.dbsetup.DbSetup;
+
+// The operations to clear the table and then import the CSV file
+var operations = sequenceOf(
+    deleteAllFrom("items"),
+    csv("test-items.csv").into("items").build()
+);
+
+var dbSetup = new DbSetup(destination, operations);
+dbSetup.launch();
+```
+
+### Use generated values and fixed values
+
+```java
+import static com.sciencesakura.dbsetup.csv.Import.csv;
+import com.ninja_squad.dbsetup.generator.ValueGenerators;
+
+var operation = csv("test-items.csv").into("items")
+    // Generate a random UUID for the `id` column
+    .withGeneratedValue("id", () -> UUID.randomUUID().toString())
+    // Generate a sequential string for the `name` column, starting with "item-001"
+    .withGeneratedValue("name", ValueGenerators.stringSequence("item-").withLeftPadding(3))
+    // Set a fixed value for the `created_at` column
+    .withDefaultValue("created_at", "2023-01-01 10:20:30")
+    .build();
+```
+
+### Use Kotlin DSL
 
 ```kotlin
+import com.ninja_squad.dbsetup_kotlin.dbSetup
 import com.sciencesakura.dbsetup.csv.csv
 
-@BeforeEach
-fun setUp() {
-  dbSetup(destination) {
-    // `testdata.csv` must be in classpath.
-    csv("testdata.csv") {
-      into("my_table")
-    }
-  }.launch()
-}
+dbSetup(destination) {
+  csv("test-items.csv") {
+    into("items")
+    withGeneratedValue("id") { UUID.randomUUID().toString() }
+  }
+}.launch()
 ```
 
-See [API reference](https://sciencesakura.github.io/dbsetup-csv/) for details.
+See [API reference](https://sciencesakura.github.io/dbsetup-csv/) for more details.
 
-## Prefer Excel ?
+## Prefer Excel?
 
 → [dbsetup-spreadsheet](https://github.com/sciencesakura/dbsetup-spreadsheet)
 
 ## License
 
-MIT License
+This library is licensed under the MIT License.
 
 Copyright (c) 2019 sciencesakura
