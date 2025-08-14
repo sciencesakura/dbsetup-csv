@@ -1,26 +1,4 @@
-/*
- * MIT License
- *
- * Copyright (c) 2019 sciencesakura
- *
- * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documentation files (the "Software"), to deal
- * in the Software without restriction, including without limitation the rights
- * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- * copies of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:
- *
- * The above copyright notice and this permission notice shall be included in all
- * copies or substantial portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
- * SOFTWARE.
- */
+// SPDX-License-Identifier: MIT
 
 package com.sciencesakura.dbsetup.csv;
 
@@ -54,24 +32,22 @@ import org.junit.jupiter.api.Test;
 
 class ImportTest {
 
-  static final String url = "jdbc:h2:mem:test;DB_CLOSE_DELAY=-1";
-
-  static final String username = "sa";
-
   AssertDbConnection connection;
 
   Destination destination;
 
+  Changes changes;
+
   @BeforeEach
   void setUp() {
+    var url = "jdbc:h2:mem:test;DB_CLOSE_DELAY=-1";
+    var username = "sa";
     connection = AssertDbConnectionFactory.of(url, username, null).create();
     destination = new DriverManagerDestination(url, username, null);
   }
 
   @Nested
   class DataTypes {
-
-    Changes changes;
 
     @BeforeEach
     void setUp() {
@@ -153,8 +129,6 @@ class ImportTest {
   @Nested
   class IntoTable {
 
-    Changes changes;
-
     @BeforeEach
     void setUp() {
       var ddl = sql("create table if not exists into_table ("
@@ -193,7 +167,8 @@ class ImportTest {
 
     @Test
     void throw_npe_if_table_name_is_null() {
-      assertThatThrownBy(() -> csv("IntoTable/into_table_2.csv").into(null))
+      var builder = csv("IntoTable/into_table_2.csv");
+      assertThatThrownBy(() -> builder.into(null))
           .isInstanceOf(NullPointerException.class)
           .hasMessage("table must not be null");
     }
@@ -201,8 +176,6 @@ class ImportTest {
 
   @Nested
   class WithCharset {
-
-    Changes changes;
 
     @BeforeEach
     void setUp() {
@@ -257,16 +230,16 @@ class ImportTest {
 
     @Test
     void throw_npe_if_charset_is_null() {
-      assertThatThrownBy(() -> csv("WithCharset/utf8.csv").into("with_charset")
-          .withCharset((Charset) null))
+      var builder = csv("WithCharset/utf8.csv").into("with_charset");
+      assertThatThrownBy(() -> builder.withCharset((Charset) null))
           .isInstanceOf(NullPointerException.class)
           .hasMessage("charset must not be null");
     }
 
     @Test
     void throw_npe_if_string_charset_is_null() {
-      assertThatThrownBy(() -> csv("WithCharset/utf8.csv").into("with_charset")
-          .withCharset((String) null))
+      var builder = csv("WithCharset/utf8.csv").into("with_charset");
+      assertThatThrownBy(() -> builder.withCharset((String) null))
           .isInstanceOf(NullPointerException.class)
           .hasMessage("charset must not be null");
     }
@@ -274,8 +247,6 @@ class ImportTest {
 
   @Nested
   class WithDelimiter {
-
-    Changes changes;
 
     @BeforeEach
     void setUp() {
@@ -317,8 +288,6 @@ class ImportTest {
 
   @Nested
   class WithHeader {
-
-    Changes changes;
 
     @BeforeEach
     void setUp() {
@@ -378,39 +347,35 @@ class ImportTest {
 
     @Test
     void throw_npe_if_array_header_is_null() {
-      assertThatThrownBy(() -> csv("WithHeader/without_header.csv")
-          .into("with_header")
-          .withHeader((String[]) null))
+      var builder = csv("WithHeader/without_header.csv").into("with_header");
+      assertThatThrownBy(() -> builder.withHeader((String[]) null))
           .isInstanceOf(NullPointerException.class)
           .hasMessage("headers must not be null");
     }
 
     @Test
     void throw_npe_if_array_header_contains_null() {
-      assertThatThrownBy(() -> csv("WithHeader/without_header.csv")
-          .into("with_header")
-          .withHeader("id", null))
+      var builder = csv("WithHeader/without_header.csv").into("with_header");
+      assertThatThrownBy(() -> builder.withHeader("id", null))
           .isInstanceOf(NullPointerException.class)
           .hasMessage("headers must not contain null");
     }
 
     @Test
     void throw_npe_if_collection_header_is_null() {
-      assertThatThrownBy(() -> csv("WithHeader/without_header.csv")
-          .into("with_header")
-          .withHeader((Collection<String>) null))
+      var builder = csv("WithHeader/without_header.csv").into("with_header");
+      assertThatThrownBy(() -> builder.withHeader((Collection<String>) null))
           .isInstanceOf(NullPointerException.class)
           .hasMessage("headers must not be null");
     }
 
     @Test
     void throw_npe_if_collection_header_contains_null() {
+      var builder = csv("WithHeader/without_header.csv").into("with_header");
       var headers = new ArrayList<String>();
       headers.add("id");
       headers.add(null);
-      assertThatThrownBy(() -> csv("WithHeader/without_header.csv")
-          .into("with_header")
-          .withHeader(headers))
+      assertThatThrownBy(() -> builder.withHeader(headers))
           .isInstanceOf(NullPointerException.class)
           .hasMessage("headers must not contain null");
     }
@@ -418,8 +383,6 @@ class ImportTest {
 
   @Nested
   class WithNullAs {
-
-    Changes changes;
 
     @BeforeEach
     void setUp() {
@@ -468,8 +431,8 @@ class ImportTest {
 
     @Test
     void throw_npe_if_null_string_is_null() {
-      assertThatThrownBy(() -> csv("WithNullAs/with_null_as.csv")
-          .withNullAs(null))
+      var builder = csv("WithNullAs/with_null_as.csv");
+      assertThatThrownBy(() -> builder.withNullAs(null))
           .isInstanceOf(NullPointerException.class)
           .hasMessage("nullString must not be null");
     }
@@ -477,8 +440,6 @@ class ImportTest {
 
   @Nested
   class WithQuote {
-
-    Changes changes;
 
     @BeforeEach
     void setUp() {
@@ -528,8 +489,6 @@ class ImportTest {
   @Nested
   class WithDefaultValue {
 
-    Changes changes;
-
     @BeforeEach
     void setUp() {
       var ddl = sql("create table if not exists with_default_value ("
@@ -561,8 +520,8 @@ class ImportTest {
 
     @Test
     void throw_npe_if_column_name_is_null() {
-      assertThatThrownBy(() -> csv("WithDefaultValue/with_default_value.csv")
-          .withDefaultValue(null, "DEFAULT"))
+      var builder = csv("WithDefaultValue/with_default_value.csv");
+      assertThatThrownBy(() -> builder.withDefaultValue(null, "DEFAULT"))
           .isInstanceOf(NullPointerException.class)
           .hasMessage("column must not be null");
     }
@@ -570,8 +529,6 @@ class ImportTest {
 
   @Nested
   class WithGeneratedValue {
-
-    Changes changes;
 
     @BeforeEach
     void setUp() {
@@ -604,16 +561,16 @@ class ImportTest {
 
     @Test
     void throw_npe_if_column_name_is_null() {
-      assertThatThrownBy(() -> csv("WithGeneratedValue/with_generated_value.csv")
-          .withGeneratedValue(null, ValueGenerators.sequence()))
+      var builder = csv("WithGeneratedValue/with_generated_value.csv");
+      assertThatThrownBy(() -> builder.withGeneratedValue(null, ValueGenerators.sequence()))
           .isInstanceOf(NullPointerException.class)
           .hasMessage("column must not be null");
     }
 
     @Test
     void throw_npe_if_value_generator_is_null() {
-      assertThatThrownBy(() -> csv("WithGeneratedValue/with_generated_value.csv")
-          .withGeneratedValue("id", null))
+      var builder = csv("WithGeneratedValue/with_generated_value.csv");
+      assertThatThrownBy(() -> builder.withGeneratedValue("id", null))
           .isInstanceOf(NullPointerException.class)
           .hasMessage("valueGenerator must not be null");
     }

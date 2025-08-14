@@ -1,7 +1,11 @@
-name: check
-on: pull_request
+name: build
+on:
+  pull_request:
+  push:
+    branches:
+      - master
 jobs:
-  check:
+  build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -10,4 +14,4 @@ jobs:
           java-version-file: .java-version
           distribution: zulu
           cache: maven
-      - run: ./mvnw -e --batch-mode test
+      - run: ./mvnw -e --batch-mode test -Djacoco.skip=true

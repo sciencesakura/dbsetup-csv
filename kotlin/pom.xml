@@ -28,6 +28,7 @@
     <dependency>
       <groupId>org.jetbrains.kotlin</groupId>
       <artifactId>kotlin-stdlib</artifactId>
+      <scope>provided</scope>
     </dependency>
 
     <dependency>
@@ -41,8 +42,8 @@
       <scope>test</scope>
     </dependency>
     <dependency>
-      <groupId>org.junit.jupiter</groupId>
-      <artifactId>junit-jupiter</artifactId>
+      <groupId>org.jetbrains.kotlin</groupId>
+      <artifactId>kotlin-test-junit5</artifactId>
       <scope>test</scope>
     </dependency>
   </dependencies>
@@ -82,7 +83,9 @@
         <groupId>org.jetbrains.dokka</groupId>
         <artifactId>dokka-maven-plugin</artifactId>
         <configuration>
-          <outputDir>${project.basedir}/../docs/dokka</outputDir>
+          <includes>
+            <include>${project.basedir}/module.md</include>
+          </includes>
         </configuration>
       </plugin>
       <plugin>
