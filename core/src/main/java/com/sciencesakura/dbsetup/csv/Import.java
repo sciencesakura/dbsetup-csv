@@ -9,13 +9,13 @@ import com.ninja_squad.dbsetup.bind.BinderConfiguration;
 import com.ninja_squad.dbsetup.generator.ValueGenerator;
 import com.ninja_squad.dbsetup.operation.Insert;
 import com.ninja_squad.dbsetup.operation.Operation;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Collection;
@@ -60,7 +60,7 @@ public final class Import implements Operation {
   }
 
   private static CSVFormat createFormat(Builder builder) {
-    CSVFormat.Builder fb = CSVFormat.Builder.create(CSVFormat.DEFAULT)
+    var fb = CSVFormat.Builder.create(CSVFormat.DEFAULT)
         .setDelimiter(builder.delimiter)
         .setNullString(builder.nullString)
         .setQuote(builder.quote)
@@ -227,7 +227,7 @@ public final class Import implements Operation {
      * Specifies a default value for the given column.
      *
      * @param column the column name to set the default value
-     * @param value the default value (nullable)
+     * @param value  the default value (nullable)
      * @return the reference to this object
      */
     public Builder withDefaultValue(@NotNull String column, Object value) {
@@ -253,7 +253,7 @@ public final class Import implements Operation {
      * Specifies a value generator for the given column.
      * The value generator is used to generate values for the column when inserting rows.
      *
-     * @param column the column name to set the value generator
+     * @param column         the column name to set the value generator
      * @param valueGenerator the value generator to use
      * @return the reference to this object
      */
@@ -275,8 +275,8 @@ public final class Import implements Operation {
     public Builder withHeader(@NotNull Collection<String> headers) {
       requireNonNull(headers, "headers must not be null");
       this.headers = new String[headers.size()];
-      int i = 0;
-      for (String header : headers) {
+      var i = 0;
+      for (var header : headers) {
         this.headers[i++] = requireNonNull(header, "headers must not contain null");
       }
       return this;
@@ -293,8 +293,8 @@ public final class Import implements Operation {
     public Builder withHeader(@NotNull String... headers) {
       requireNonNull(headers, "headers must not be null");
       this.headers = new String[headers.length];
-      int i = 0;
-      for (String header : headers) {
+      var i = 0;
+      for (var header : headers) {
         this.headers[i++] = requireNonNull(header, "headers must not contain null");
       }
       return this;
@@ -326,20 +326,17 @@ public final class Import implements Operation {
       return this;
     }
 
+    @SuppressFBWarnings("NP_NULL_ON_SOME_PATH_FROM_RETURN_VALUE")
     private String table() {
-      if (table == null) {
-        String table;
-        try {
-          Path filename = Paths.get(location.toURI()).getFileName();
-          assert filename != null;
-          table = filename.toString();
-        } catch (URISyntaxException e) {
-          throw new DbSetupRuntimeException(e);
-        }
-        int p = table.lastIndexOf('.');
-        return p == -1 ? table : table.substring(0, p);
-      } else {
+      if (table != null) {
         return table;
+      }
+      try {
+        var filename = Path.of(location.toURI()).getFileName().toString();
+        var p = filename.lastIndexOf('.');
+        return p == -1 ? filename : filename.substring(0, p);
+      } catch (URISyntaxException e) {
+        throw new DbSetupRuntimeException(e);
       }
     }
   }

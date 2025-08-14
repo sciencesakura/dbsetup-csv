@@ -17,6 +17,11 @@
 
   <dependencies>
     <dependency>
+      <groupId>com.github.spotbugs</groupId>
+      <artifactId>spotbugs-annotations</artifactId>
+      <optional>true</optional>
+    </dependency>
+    <dependency>
       <groupId>com.ninja-squad</groupId>
       <artifactId>DbSetup</artifactId>
     </dependency>
@@ -72,9 +77,6 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-javadoc-plugin</artifactId>
-        <configuration>
-          <outputDirectory>${project.basedir}/../docs</outputDirectory>
-        </configuration>
       </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>

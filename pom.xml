@@ -11,7 +11,7 @@
 
   <name>dbsetup-csv-parent</name>
   <url>https://github.com/sciencesakura/dbsetup-csv</url>
-  <description>An extension of DbSetup to import data from CSV/TSV files.</description>
+  <description>A DbSetup extension for importing CSV files into the database.</description>
   <organization>
     <name>sciencesakura.com</name>
     <url>https://www.sciencesakura.com/</url>
@@ -66,11 +66,17 @@
     <dbsetup.version>2.1.0</dbsetup.version>
     <h2.version>2.3.232</h2.version>
     <jetbrains-annotations.version>13.0</jetbrains-annotations.version>
-    <junit-jupiter.version>5.13.4</junit-jupiter.version>
+    <junit-jupiter.version>5.10.1</junit-jupiter.version>
+    <spotbugs.version>4.9.3</spotbugs.version>
   </properties>
 
   <dependencyManagement>
     <dependencies>
+      <dependency>
+        <groupId>com.github.spotbugs</groupId>
+        <artifactId>spotbugs-annotations</artifactId>
+        <version>${spotbugs.version}</version>
+      </dependency>
       <dependency>
         <groupId>com.h2database</groupId>
         <artifactId>h2</artifactId>
@@ -113,6 +119,11 @@
         <version>${kotlin.version}</version>
       </dependency>
       <dependency>
+        <groupId>org.jetbrains.kotlin</groupId>
+        <artifactId>kotlin-test-junit5</artifactId>
+        <version>${kotlin.version}</version>
+      </dependency>
+      <dependency>
         <groupId>org.junit.jupiter</groupId>
         <artifactId>junit-jupiter</artifactId>
         <version>${junit-jupiter.version}</version>
@@ -130,8 +141,6 @@
           <configuration>
             <configLocation>google_checks.xml</configLocation>
             <consoleOutput>true</consoleOutput>
-            <failOnViolation>true</failOnViolation>
-            <linkXRef>false</linkXRef>
           </configuration>
           <dependencies>
             <dependency>
@@ -207,6 +216,9 @@
           <groupId>com.github.spotbugs</groupId>
           <artifactId>spotbugs-maven-plugin</artifactId>
           <version>${spotbugs-maven-plugin.version}</version>
+          <configuration>
+            <includeTests>true</includeTests>
+          </configuration>
           <executions>
             <execution>
               <phase>test</phase>
@@ -220,9 +232,11 @@
           <groupId>org.apache.felix</groupId>
           <artifactId>maven-bundle-plugin</artifactId>
           <version>${maven-bundle-plugin.version}</version>
+          <extensions>true</extensions>
           <configuration>
             <instructions>
-              <Import-Package>!java.*,!javax.*,!kotlin.*,!kotlinx.*,*</Import-Package>
+              <Bundle-DocURL>${project.url}</Bundle-DocURL>
+              <Import-Package>!java.*,!kotlin.*,*</Import-Package>
             </instructions>
           </configuration>
           <executions>
