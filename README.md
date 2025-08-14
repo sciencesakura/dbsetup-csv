@@ -15,13 +15,13 @@ The dbsetup-csv library is available on Maven Central. You can install it using 
 ### Gradle
 
 ```groovy
-testImplementation 'com.sciencesakura:dbsetup-csv:3.0.0'
+testImplementation 'com.sciencesakura:dbsetup-csv:3.0.1'
 ```
 
 If you are using Kotlin, you can use the Kotlin module for a more concise DSL:
 
 ```groovy
-testImplementation 'com.sciencesakura:dbsetup-csv-kt:3.0.0'
+testImplementation 'com.sciencesakura:dbsetup-csv-kt:3.0.1'
 ```
 
 ### Maven
@@ -30,7 +30,7 @@ testImplementation 'com.sciencesakura:dbsetup-csv-kt:3.0.0'
 <dependency>
   <groupId>com.sciencesakura</groupId>
   <artifactId>dbsetup-csv</artifactId>
-  <version>3.0.0</version>
+  <version>3.0.1</version>
   <scope>test</scope>
 </dependency>
 ```
@@ -41,7 +41,7 @@ If you are using Kotlin, you can use the Kotlin module for a more concise DSL:
 <dependency>
   <groupId>com.sciencesakura</groupId>
   <artifactId>dbsetup-csv-kt</artifactId>
-  <version>3.0.0</version>
+  <version>3.0.1</version>
   <scope>test</scope>
 </dependency>
 ```
