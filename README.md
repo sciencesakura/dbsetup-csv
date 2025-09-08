@@ -1,6 +1,6 @@
 # dbsetup-csv: Import CSV into database with DbSetup
 
-![](https://github.com/sciencesakura/dbsetup-csv/actions/workflows/build.yaml/badge.svg) [![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.sciencesakura/dbsetup-csv/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.sciencesakura/dbsetup-csv)
+![](https://github.com/sciencesakura/dbsetup-csv/actions/workflows/build.yaml/badge.svg) [![Maven Central](https://maven-badges.sml.io/sonatype-central/com.sciencesakura/dbsetup-csv/badge.svg)](https://maven-badges.sml.io/sonatype-central/com.sciencesakura/dbsetup-csv)
 
 A [DbSetup](http://dbsetup.ninja-squad.com/) extension for importing CSV files into the database.
 
