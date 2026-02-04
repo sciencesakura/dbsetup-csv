@@ -7,7 +7,7 @@
   <parent>
     <groupId>com.sciencesakura</groupId>
     <artifactId>dbsetup-csv-parent</artifactId>
-    <version>3.0.1</version>
+    <version>3.0.2-SNAPSHOT</version>
   </parent>
   <artifactId>dbsetup-csv-kt</artifactId>
   <packaging>jar</packaging>
