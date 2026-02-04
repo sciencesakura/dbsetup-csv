@@ -6,7 +6,7 @@
 
   <groupId>com.sciencesakura</groupId>
   <artifactId>dbsetup-csv-parent</artifactId>
-  <version>3.0.1</version>
+  <version>3.0.2-SNAPSHOT</version>
   <packaging>pom</packaging>
 
   <name>dbsetup-csv-parent</name>
@@ -42,32 +42,33 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     <java.version>11</java.version>
-    <kotlin.version>2.2.0</kotlin.version>
+    <kotlin.version>2.3.0</kotlin.version>
     <maven.compiler.release>${java.version}</maven.compiler.release>
 
     <!-- plugin versions -->
     <maven-bundle-plugin.version>5.1.9</maven-bundle-plugin.version>
     <maven-checkstyle-plugin.version>3.6.0</maven-checkstyle-plugin.version>
-    <maven-enforcer-plugin.version>3.6.1</maven-enforcer-plugin.version>
+    <maven-enforcer-plugin.version>3.6.2</maven-enforcer-plugin.version>
     <maven-gpg-plugin.version>3.2.8</maven-gpg-plugin.version>
-    <maven-jar-plugin.version>3.4.2</maven-jar-plugin.version>
-    <maven-javadoc-plugin.version>3.11.2</maven-javadoc-plugin.version>
-    <maven-source-plugin.version>3.3.1</maven-source-plugin.version>
-    <central-publishing-maven-plugin.version>0.8.0</central-publishing-maven-plugin.version>
-    <dokka-maven-plugin.version>2.0.0</dokka-maven-plugin.version>
-    <jacoco-maven-plugin.version>0.8.13</jacoco-maven-plugin.version>
+    <maven-jar-plugin.version>3.5.0</maven-jar-plugin.version>
+    <maven-javadoc-plugin.version>3.12.0</maven-javadoc-plugin.version>
+    <maven-source-plugin.version>3.4.0</maven-source-plugin.version>
+    <central-publishing-maven-plugin.version>0.10.0</central-publishing-maven-plugin.version>
+    <dokka-maven-plugin.version>2.1.0</dokka-maven-plugin.version>
+    <jacoco-maven-plugin.version>0.8.14</jacoco-maven-plugin.version>
     <ktlint-maven-plugin.version>3.5.0</ktlint-maven-plugin.version>
-    <spotbugs-maven-plugin.version>4.9.3.2</spotbugs-maven-plugin.version>
+    <spotbugs-maven-plugin.version>4.9.8.2</spotbugs-maven-plugin.version>
+    <versions-maven-plugin.version>2.21.0</versions-maven-plugin.version>
 
     <!-- dependency versions -->
-    <assertj-db.version>3.0.0</assertj-db.version>
+    <assertj-db.version>3.0.1</assertj-db.version>
     <checkstyle.version>10.26.1</checkstyle.version>
     <commons-csv.version>1.14.1</commons-csv.version>
     <dbsetup.version>2.1.0</dbsetup.version>
-    <h2.version>2.3.232</h2.version>
+    <h2.version>2.4.240</h2.version>
     <jetbrains-annotations.version>13.0</jetbrains-annotations.version>
-    <junit-jupiter.version>5.10.1</junit-jupiter.version>
-    <spotbugs.version>4.9.3</spotbugs.version>
+    <junit-jupiter.version>5.14.2</junit-jupiter.version>
+    <spotbugs.version>4.9.8</spotbugs.version>
   </properties>
 
   <dependencyManagement>
@@ -141,6 +142,7 @@
           <configuration>
             <configLocation>google_checks.xml</configLocation>
             <consoleOutput>true</consoleOutput>
+            <failOnViolation>true</failOnViolation>
           </configuration>
           <dependencies>
             <dependency>
@@ -290,6 +292,28 @@
     <plugins>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-enforcer-plugin</artifactId>
+        <version>${maven-enforcer-plugin.version}</version>
+        <configuration>
+          <rules>
+            <requireJavaVersion>
+              <version>${java.version}</version>
+            </requireJavaVersion>
+            <requireMavenVersion>
+              <version>[3.6.3,)</version>
+            </requireMavenVersion>
+          </rules>
+        </configuration>
+        <executions>
+          <execution>
+            <goals>
+              <goal>enforce</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-gpg-plugin</artifactId>
         <version>${maven-gpg-plugin.version}</version>
         <executions>
@@ -299,6 +323,11 @@
             </goals>
           </execution>
         </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>versions-maven-plugin</artifactId>
+        <version>${versions-maven-plugin.version}</version>
       </plugin>
       <plugin>
         <groupId>org.sonatype.central</groupId>
