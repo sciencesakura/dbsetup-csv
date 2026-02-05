@@ -9,7 +9,6 @@ import com.ninja_squad.dbsetup.bind.BinderConfiguration;
 import com.ninja_squad.dbsetup.generator.ValueGenerator;
 import com.ninja_squad.dbsetup.operation.Insert;
 import com.ninja_squad.dbsetup.operation.Operation;
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -338,7 +337,6 @@ public final class Import implements Operation {
       return this;
     }
 
-    @SuppressFBWarnings("NP_NULL_ON_SOME_PATH_FROM_RETURN_VALUE")
     private String table() {
       if (table != null) {
         return table;
