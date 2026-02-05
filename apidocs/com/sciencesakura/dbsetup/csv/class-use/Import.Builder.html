@@ -127,20 +127,27 @@ $('.navPadding').css('padding-top', $('.fixedNav').css("height"));
 </td>
 </tr>
 <tr class="altColor">
+<td class="colFirst"><code>static <a href="../Import.Builder.html" title="class in com.sciencesakura.dbsetup.csv">Import.Builder</a></code></td>
+<th class="colSecond" scope="row"><span class="typeNameLabel">Import.</span><code><span class="memberNameLink"><a href="../Import.html#tsv(java.lang.String)">tsv</a></span>&#8203;(<a href="https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/lang/String.html?is-external=true" title="class or interface in java.lang" class="externalLink">String</a>&nbsp;location)</code></th>
+<td class="colLast">
+<div class="block">Creates a new <code>Import.Builder</code> instance with TSV format.</div>
+</td>
+</tr>
+<tr class="rowColor">
 <td class="colFirst"><code><a href="../Import.Builder.html" title="class in com.sciencesakura.dbsetup.csv">Import.Builder</a></code></td>
 <th class="colSecond" scope="row"><span class="typeNameLabel">Import.Builder.</span><code><span class="memberNameLink"><a href="../Import.Builder.html#withCharset(java.lang.String)">withCharset</a></span>&#8203;(<a href="https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/lang/String.html?is-external=true" title="class or interface in java.lang" class="externalLink">String</a>&nbsp;charset)</code></th>
 <td class="colLast">
 <div class="block">Specifies a character encoding to read the CSV file.</div>
 </td>
 </tr>
-<tr class="rowColor">
+<tr class="altColor">
 <td class="colFirst"><code><a href="../Import.Builder.html" title="class in com.sciencesakura.dbsetup.csv">Import.Builder</a></code></td>
 <th class="colSecond" scope="row"><span class="typeNameLabel">Import.Builder.</span><code><span class="memberNameLink"><a href="../Import.Builder.html#withCharset(java.nio.charset.Charset)">withCharset</a></span>&#8203;(<a href="https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/nio/charset/Charset.html?is-external=true" title="class or interface in java.nio.charset" class="externalLink">Charset</a>&nbsp;charset)</code></th>
 <td class="colLast">
 <div class="block">Specifies a character encoding to read the CSV file.</div>
 </td>
 </tr>
-<tr class="altColor">
+<tr class="rowColor">
 <td class="colFirst"><code><a href="../Import.Builder.html" title="class in com.sciencesakura.dbsetup.csv">Import.Builder</a></code></td>
 <th class="colSecond" scope="row"><span class="typeNameLabel">Import.Builder.</span><code><span class="memberNameLink"><a href="../Import.Builder.html#withDefaultValue(java.lang.String,java.lang.Object)">withDefaultValue</a></span>&#8203;(<a href="https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/lang/String.html?is-external=true" title="class or interface in java.lang" class="externalLink">String</a>&nbsp;column,
                 <a href="https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/lang/Object.html?is-external=true" title="class or interface in java.lang" class="externalLink">Object</a>&nbsp;value)</code></th>
@@ -148,14 +155,14 @@ $('.navPadding').css('padding-top', $('.fixedNav').css("height"));
 <div class="block">Specifies a default value for the given column.</div>
 </td>
 </tr>
-<tr class="rowColor">
+<tr class="altColor">
 <td class="colFirst"><code><a href="../Import.Builder.html" title="class in com.sciencesakura.dbsetup.csv">Import.Builder</a></code></td>
 <th class="colSecond" scope="row"><span class="typeNameLabel">Import.Builder.</span><code><span class="memberNameLink"><a href="../Import.Builder.html#withDelimiter(char)">withDelimiter</a></span>&#8203;(char&nbsp;delimiter)</code></th>
 <td class="colLast">
 <div class="block">Specifies a delimiter to separate values in the CSV file.</div>
 </td>
 </tr>
-<tr class="altColor">
+<tr class="rowColor">
 <td class="colFirst"><code><a href="../Import.Builder.html" title="class in com.sciencesakura.dbsetup.csv">Import.Builder</a></code></td>
 <th class="colSecond" scope="row"><span class="typeNameLabel">Import.Builder.</span><code><span class="memberNameLink"><a href="../Import.Builder.html#withGeneratedValue(java.lang.String,com.ninja_squad.dbsetup.generator.ValueGenerator)">withGeneratedValue</a></span>&#8203;(<a href="https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/lang/String.html?is-external=true" title="class or interface in java.lang" class="externalLink">String</a>&nbsp;column,
                   com.ninja_squad.dbsetup.generator.ValueGenerator&lt;?&gt;&nbsp;valueGenerator)</code></th>
@@ -163,28 +170,28 @@ $('.navPadding').css('padding-top', $('.fixedNav').css("height"));
 <div class="block">Specifies a value generator for the given column.</div>
 </td>
 </tr>
-<tr class="rowColor">
+<tr class="altColor">
 <td class="colFirst"><code><a href="../Import.Builder.html" title="class in com.sciencesakura.dbsetup.csv">Import.Builder</a></code></td>
 <th class="colSecond" scope="row"><span class="typeNameLabel">Import.Builder.</span><code><span class="memberNameLink"><a href="../Import.Builder.html#withHeader(java.lang.String...)">withHeader</a></span>&#8203;(<a href="https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/lang/String.html?is-external=true" title="class or interface in java.lang" class="externalLink">String</a>...&nbsp;headers)</code></th>
 <td class="colLast">
 <div class="block">Specifies the headers of the CSV file.</div>
 </td>
 </tr>
-<tr class="altColor">
+<tr class="rowColor">
 <td class="colFirst"><code><a href="../Import.Builder.html" title="class in com.sciencesakura.dbsetup.csv">Import.Builder</a></code></td>
 <th class="colSecond" scope="row"><span class="typeNameLabel">Import.Builder.</span><code><span class="memberNameLink"><a href="../Import.Builder.html#withHeader(java.util.Collection)">withHeader</a></span>&#8203;(<a href="https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/util/Collection.html?is-external=true" title="class or interface in java.util" class="externalLink">Collection</a>&lt;<a href="https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/lang/String.html?is-external=true" title="class or interface in java.lang" class="externalLink">String</a>&gt;&nbsp;headers)</code></th>
 <td class="colLast">
 <div class="block">Specifies the headers of the CSV file.</div>
 </td>
 </tr>
-<tr class="rowColor">
+<tr class="altColor">
 <td class="colFirst"><code><a href="../Import.Builder.html" title="class in com.sciencesakura.dbsetup.csv">Import.Builder</a></code></td>
 <th class="colSecond" scope="row"><span class="typeNameLabel">Import.Builder.</span><code><span class="memberNameLink"><a href="../Import.Builder.html#withNullAs(java.lang.String)">withNullAs</a></span>&#8203;(<a href="https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/lang/String.html?is-external=true" title="class or interface in java.lang" class="externalLink">String</a>&nbsp;nullString)</code></th>
 <td class="colLast">
 <div class="block">Specifies a string to represent null values in the CSV file.</div>
 </td>
 </tr>
-<tr class="altColor">
+<tr class="rowColor">
 <td class="colFirst"><code><a href="../Import.Builder.html" title="class in com.sciencesakura.dbsetup.csv">Import.Builder</a></code></td>
 <th class="colSecond" scope="row"><span class="typeNameLabel">Import.Builder.</span><code><span class="memberNameLink"><a href="../Import.Builder.html#withQuote(char)">withQuote</a></span>&#8203;(char&nbsp;quote)</code></th>
 <td class="colLast">

@@ -3,4 +3,6 @@ $dokka.linkExtension:html
 $dokka.location:com.sciencesakura.dbsetup.csv////PointingToDeclaration/dbsetup-csv-kt/com.sciencesakura.dbsetup.csv/index.html
 $dokka.location:com.sciencesakura.dbsetup.csv//csv/com.ninja_squad.dbsetup_kotlin.DbSetupBuilder#kotlin.String#kotlin.Function1[com.sciencesakura.dbsetup.csv.Import.Builder,kotlin.Unit]/PointingToDeclaration/dbsetup-csv-kt/com.sciencesakura.dbsetup.csv/csv.html
 $dokka.location:com.sciencesakura.dbsetup.csv//csv/com.ninja_squad.dbsetup_kotlin.DbSetupBuilder#kotlin.String/PointingToDeclaration/dbsetup-csv-kt/com.sciencesakura.dbsetup.csv/csv.html
+$dokka.location:com.sciencesakura.dbsetup.csv//tsv/com.ninja_squad.dbsetup_kotlin.DbSetupBuilder#kotlin.String#kotlin.Function1[com.sciencesakura.dbsetup.csv.Import.Builder,kotlin.Unit]/PointingToDeclaration/dbsetup-csv-kt/com.sciencesakura.dbsetup.csv/tsv.html
+$dokka.location:com.sciencesakura.dbsetup.csv//tsv/com.ninja_squad.dbsetup_kotlin.DbSetupBuilder#kotlin.String/PointingToDeclaration/dbsetup-csv-kt/com.sciencesakura.dbsetup.csv/tsv.html
 com.sciencesakura.dbsetup.csv
