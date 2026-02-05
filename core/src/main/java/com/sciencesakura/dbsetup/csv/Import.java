@@ -59,6 +59,18 @@ public final class Import implements Operation {
     return new Builder(urlLocation);
   }
 
+  /**
+   * Creates a new {@code Import.Builder} instance with TSV format.
+   *
+   * @param location the {@code /}-separated path from classpath root to the TSV file
+   * @return the new {@code Import.Builder} instance
+   * @throws IllegalArgumentException if the TSV file is not found
+   */
+  @NotNull
+  public static Builder tsv(@NotNull String location) {
+    return csv(location).withDelimiter('\t');
+  }
+
   private static CSVFormat createFormat(Builder builder) {
     var fb = CSVFormat.Builder.create(CSVFormat.DEFAULT)
         .setDelimiter(builder.delimiter)

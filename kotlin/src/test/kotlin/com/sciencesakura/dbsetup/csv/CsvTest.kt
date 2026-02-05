@@ -64,6 +64,38 @@ class CsvTest {
       .hasNumberOfChanges(1)
       .changeOfCreation()
       .rowAtEndPoint()
+      .value("id").isEqualTo(2)
+      .value("name").isEqualTo("bar")
+  }
+
+  @Test
+  fun import_tsv() {
+    changes.setStartPointNow()
+    dbSetup(destination) {
+      tsv("kt_test.tsv")
+    }.launch()
+    @Suppress("ktlint:standard:chain-method-continuation")
+    assertThat(changes.setEndPointNow())
+      .hasNumberOfChanges(1)
+      .changeOfCreation()
+      .rowAtEndPoint()
+      .value("id").isEqualTo(2)
+      .value("name").isEqualTo("bar")
+  }
+
+  @Test
+  fun import_tsv_with_configure() {
+    changes.setStartPointNow()
+    dbSetup(destination) {
+      tsv("kt_test.csv") {
+        withDelimiter(',')
+      }
+    }.launch()
+    @Suppress("ktlint:standard:chain-method-continuation")
+    assertThat(changes.setEndPointNow())
+      .hasNumberOfChanges(1)
+      .changeOfCreation()
+      .rowAtEndPoint()
       .value("id").isEqualTo(1)
       .value("name").isEqualTo("foo")
   }
