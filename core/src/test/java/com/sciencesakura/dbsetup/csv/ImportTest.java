@@ -6,6 +6,7 @@ import static com.ninja_squad.dbsetup.Operations.sequenceOf;
 import static com.ninja_squad.dbsetup.Operations.sql;
 import static com.ninja_squad.dbsetup.Operations.truncate;
 import static com.sciencesakura.dbsetup.csv.Import.csv;
+import static com.sciencesakura.dbsetup.csv.Import.tsv;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.db.api.Assertions.assertThat;
 
@@ -281,8 +282,21 @@ class ImportTest {
           .hasNumberOfChanges(1)
           .changeOfCreation()
           .rowAtEndPoint()
-          .value("id").isEqualTo(1)
-          .value("name").isEqualTo("Alice");
+          .value("id").isEqualTo(2)
+          .value("name").isEqualTo("Bob");
+    }
+
+    @Test
+    void use_tab_if_tsv_function_invoked() {
+      changes.setStartPointNow();
+      var operation = tsv("WithDelimiter/with_delimiter.tsv").build();
+      new DbSetup(destination, operation).launch();
+      assertThat(changes.setEndPointNow())
+          .hasNumberOfChanges(1)
+          .changeOfCreation()
+          .rowAtEndPoint()
+          .value("id").isEqualTo(2)
+          .value("name").isEqualTo("Bob");
     }
   }
 
