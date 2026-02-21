@@ -66,7 +66,7 @@
     <commons-csv.version>1.14.1</commons-csv.version>
     <dbsetup.version>2.1.0</dbsetup.version>
     <h2.version>2.4.240</h2.version>
-    <jetbrains-annotations.version>13.0</jetbrains-annotations.version>
+    <jspecify.version>1.0.0</jspecify.version>
     <junit-jupiter.version>6.0.3</junit-jupiter.version>
   </properties>
 
@@ -118,11 +118,6 @@
         <version>${assertj-db.version}</version>
       </dependency>
       <dependency>
-        <groupId>org.jetbrains</groupId>
-        <artifactId>annotations</artifactId>
-        <version>${jetbrains-annotations.version}</version>
-      </dependency>
-      <dependency>
         <groupId>org.jetbrains.kotlin</groupId>
         <artifactId>kotlin-stdlib</artifactId>
         <version>${kotlin.version}</version>
@@ -131,6 +126,11 @@
         <groupId>org.jetbrains.kotlin</groupId>
         <artifactId>kotlin-test-junit5</artifactId>
         <version>${kotlin.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.jspecify</groupId>
+        <artifactId>jspecify</artifactId>
+        <version>${jspecify.version}</version>
       </dependency>
       <dependency>
         <groupId>org.junit.jupiter</groupId>
