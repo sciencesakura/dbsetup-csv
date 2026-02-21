@@ -15,13 +15,13 @@ The dbsetup-csv library is available on Maven Central. You can install it using 
 ### Gradle
 
 ```groovy
-testImplementation 'com.sciencesakura:dbsetup-csv:3.0.1'
+testImplementation 'com.sciencesakura:dbsetup-csv:3.0.2'
 ```
 
 If you are using Kotlin, you can use the Kotlin module for a more concise DSL:
 
 ```groovy
-testImplementation 'com.sciencesakura:dbsetup-csv-kt:3.0.1'
+testImplementation 'com.sciencesakura:dbsetup-csv-kt:3.0.2'
 ```
 
 ### Maven
@@ -30,7 +30,7 @@ testImplementation 'com.sciencesakura:dbsetup-csv-kt:3.0.1'
 <dependency>
   <groupId>com.sciencesakura</groupId>
   <artifactId>dbsetup-csv</artifactId>
-  <version>3.0.1</version>
+  <version>3.0.2</version>
   <scope>test</scope>
 </dependency>
 ```
@@ -41,7 +41,7 @@ If you are using Kotlin, you can use the Kotlin module for a more concise DSL:
 <dependency>
   <groupId>com.sciencesakura</groupId>
   <artifactId>dbsetup-csv-kt</artifactId>
-  <version>3.0.1</version>
+  <version>3.0.2</version>
   <scope>test</scope>
 </dependency>
 ```
@@ -57,7 +57,7 @@ import com.ninja_squad.dbsetup.DbSetup;
 // The operation to import a CSV file into a table
 var operation = csv("test-items.csv").into("items").build();
 // when importing a TSV file:
-// var operation = csv("test-items.tsv").into("items").withDelimiter('\t').build();
+// var operation = tsv("test-items.tsv").into("items").build();
 
 // Create a `DbSetup` instance with the operation and execute it
 var dbSetup = new DbSetup(destination, operation);
