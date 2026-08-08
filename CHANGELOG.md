@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 ### Changed
 - build: Upgrade the Java used for building from 17 to 21 (https://github.com/sciencesakura/dbsetup-csv/pull/64).
+- ci: Set paths to reduce unnecessary CI runs (https://github.com/sciencesakura/dbsetup-csv/pull/65).
 
 ## [3.0.2] - 2026-02-21
 ### Added
