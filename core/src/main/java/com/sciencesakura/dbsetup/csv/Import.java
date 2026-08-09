@@ -22,7 +22,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
-import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
 /**
  * An operation which imports the CSV file into the database.
@@ -48,8 +48,7 @@ public final class Import implements Operation {
    * @return the new {@code Import.Builder} instance
    * @throws IllegalArgumentException if the CSV file is not found
    */
-  @NonNull
-  public static Builder csv(@NonNull String location) {
+  public static Builder csv(String location) {
     var urlLocation = Import.class.getClassLoader()
         .getResource(requireNonNull(location, "location must not be null"));
     if (urlLocation == null) {
@@ -65,8 +64,7 @@ public final class Import implements Operation {
    * @return the new {@code Import.Builder} instance
    * @throws IllegalArgumentException if the TSV file is not found
    */
-  @NonNull
-  public static Builder tsv(@NonNull String location) {
+  public static Builder tsv(String location) {
     return csv(location).withDelimiter('\t');
   }
 
@@ -163,13 +161,14 @@ public final class Import implements Operation {
 
     private final URL location;
 
+    @Nullable
     private String table;
 
     private Charset charset = StandardCharsets.UTF_8;
 
     private char delimiter = ',';
 
-    private String[] headers;
+    private String @Nullable [] headers;
 
     private String nullString = "";
 
@@ -186,7 +185,6 @@ public final class Import implements Operation {
      *
      * @return the new {@code Import} instance
      */
-    @NonNull
     public Import build() {
       if (built) {
         throw new IllegalStateException("already built");
@@ -202,7 +200,7 @@ public final class Import implements Operation {
      * @param table the table name to import the CSV file
      * @return the reference to this object
      */
-    public Builder into(@NonNull String table) {
+    public Builder into(String table) {
       this.table = requireNonNull(table, "table must not be null");
       return this;
     }
@@ -215,7 +213,7 @@ public final class Import implements Operation {
      * @param charset the character encoding to read the CSV file
      * @return the reference to this object
      */
-    public Builder withCharset(@NonNull Charset charset) {
+    public Builder withCharset(Charset charset) {
       this.charset = requireNonNull(charset, "charset must not be null");
       return this;
     }
@@ -228,7 +226,7 @@ public final class Import implements Operation {
      * @param charset the character encoding to read the CSV file
      * @return the reference to this object
      */
-    public Builder withCharset(@NonNull String charset) {
+    public Builder withCharset(String charset) {
       requireNonNull(charset, "charset must not be null");
       this.charset = Charset.forName(charset);
       return this;
@@ -241,7 +239,7 @@ public final class Import implements Operation {
      * @param value  the default value (nullable)
      * @return the reference to this object
      */
-    public Builder withDefaultValue(@NonNull String column, Object value) {
+    public Builder withDefaultValue(String column, Object value) {
       requireNonNull(column, "column must not be null");
       defaultValues.put(column, value);
       return this;
@@ -268,7 +266,7 @@ public final class Import implements Operation {
      * @param valueGenerator the value generator to use
      * @return the reference to this object
      */
-    public Builder withGeneratedValue(@NonNull String column, @NonNull ValueGenerator<?> valueGenerator) {
+    public Builder withGeneratedValue(String column, ValueGenerator<?> valueGenerator) {
       requireNonNull(column, "column must not be null");
       requireNonNull(valueGenerator, "valueGenerator must not be null");
       valueGenerators.put(column, valueGenerator);
@@ -283,7 +281,7 @@ public final class Import implements Operation {
      * @param headers the headers of the CSV file
      * @return the reference to this object
      */
-    public Builder withHeader(@NonNull Collection<String> headers) {
+    public Builder withHeader(Collection<String> headers) {
       requireNonNull(headers, "headers must not be null");
       this.headers = new String[headers.size()];
       var i = 0;
@@ -301,7 +299,7 @@ public final class Import implements Operation {
      * @param headers the headers of the CSV file
      * @return the reference to this object
      */
-    public Builder withHeader(@NonNull String... headers) {
+    public Builder withHeader(String... headers) {
       requireNonNull(headers, "headers must not be null");
       this.headers = new String[headers.length];
       var i = 0;
@@ -319,7 +317,7 @@ public final class Import implements Operation {
      * @param nullString the string to represent null values
      * @return the reference to this object
      */
-    public Builder withNullAs(@NonNull String nullString) {
+    public Builder withNullAs(String nullString) {
       this.nullString = requireNonNull(nullString, "nullString must not be null");
       return this;
     }
