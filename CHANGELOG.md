@@ -10,6 +10,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - build: Upgrade the Java used for building from 17 to 21 (https://github.com/sciencesakura/dbsetup-csv/pull/64).
 - ci: Set paths to reduce unnecessary CI runs (https://github.com/sciencesakura/dbsetup-csv/pull/65).
 - ci: Deploy docs automatically (https://github.com/sciencesakura/dbsetup-csv/pull/66).
+- build: Add Dependabot (https://github.com/sciencesakura/dbsetup-csv/pull/67).
+- Bump org.junit.jupiter:junit-jupiter from 6.0.3 to 6.1.2 (https://github.com/sciencesakura/dbsetup-csv/pull/68).
+- Bump com.puppycrawl.tools:checkstyle from 12.3.1 to 13.9.0 (https://github.com/sciencesakura/dbsetup-csv/pull/69).
 
 ## [3.0.2] - 2026-02-21
 ### Added
