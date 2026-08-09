@@ -66,7 +66,7 @@
     <commons-csv.version>1.14.1</commons-csv.version>
     <dbsetup.version>2.1.0</dbsetup.version>
     <h2.version>2.4.240</h2.version>
-    <jspecify.version>1.0.0</jspecify.version>
+    <jspecify.version>1.0.1</jspecify.version>
     <junit-jupiter.version>6.1.2</junit-jupiter.version>
   </properties>
 
