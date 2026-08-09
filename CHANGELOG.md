@@ -13,6 +13,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - build: Add Dependabot (https://github.com/sciencesakura/dbsetup-csv/pull/67).
 - Bump org.junit.jupiter:junit-jupiter from 6.0.3 to 6.1.2 (https://github.com/sciencesakura/dbsetup-csv/pull/68).
 - Bump com.puppycrawl.tools:checkstyle from 12.3.1 to 13.9.0 (https://github.com/sciencesakura/dbsetup-csv/pull/69).
+- Bump kotlin.version from 2.3.10 to 2.4.10 (https://github.com/sciencesakura/dbsetup-csv/pull/70).
+- build: Remove the redundant option kotlin.compiler.jvmTarget (https://github.com/sciencesakura/dbsetup-csv/pull/75).
+- Bump org.assertj:assertj-db from 3.0.1 to 3.0.2 (https://github.com/sciencesakura/dbsetup-csv/pull/71).
+- Bump org.jspecify:jspecify from 1.0.0 to 1.0.1 (https://github.com/sciencesakura/dbsetup-csv/pull/72).
 
 ## [3.0.2] - 2026-02-21
 ### Added
