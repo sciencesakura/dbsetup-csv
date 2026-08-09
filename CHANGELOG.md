@@ -23,6 +23,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - build(deps): bump org.jetbrains.dokka:dokka-maven-plugin from 2.1.0 to 2.2.0 (https://github.com/sciencesakura/dbsetup-csv/pull/74).
 - build: Follow the maven-bundle-plugin's default behavior for Import-Package (https://github.com/sciencesakura/dbsetup-csv/pull/78).
 - feat: Use package-level nullability annotation (https://github.com/sciencesakura/dbsetup-csv/pull/79).
+- build(deps): bump org.apache.maven.plugins:maven-jar-plugin from 3.5.0 to 3.5.1 (https://github.com/sciencesakura/dbsetup-csv/pull/80).
+- build(deps): bump com.github.gantsign.maven:ktlint-maven-plugin from 3.5.0 to 3.7.1 (https://github.com/sciencesakura/dbsetup-csv/pull/81).
+- build(deps-dev): bump org.sonatype.central:central-publishing-maven-plugin from 0.10.0 to 0.11.0 (https://github.com/sciencesakura/dbsetup-csv/pull/82).
+- build(deps-dev): bump org.apache.maven.plugins:maven-enforcer-plugin from 3.6.2 to 3.6.3 (https://github.com/sciencesakura/dbsetup-csv/pull/83).
+- build(deps): bump org.apache.felix:maven-bundle-plugin from 6.0.0 to 6.1.0 (https://github.com/sciencesakura/dbsetup-csv/pull/84).
 
 ## [3.0.2] - 2026-02-21
 ### Added
