@@ -17,6 +17,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - build: Remove the redundant option kotlin.compiler.jvmTarget (https://github.com/sciencesakura/dbsetup-csv/pull/75).
 - Bump org.assertj:assertj-db from 3.0.1 to 3.0.2 (https://github.com/sciencesakura/dbsetup-csv/pull/71).
 - Bump org.jspecify:jspecify from 1.0.0 to 1.0.1 (https://github.com/sciencesakura/dbsetup-csv/pull/72).
+- build: Exclude tests from SpotBugs linting (https://github.com/sciencesakura/dbsetup-csv/pull/76).
+- build(deps): bump com.github.spotbugs:spotbugs-maven-plugin from 4.9.8.2 to 4.10.3.0 (https://github.com/sciencesakura/dbsetup-csv/pull/73).
+- chore: Update SpotBugs filter's schema version from 4.8.4 to 4.10.0 (https://github.com/sciencesakura/dbsetup-csv/pull/77).
+- build(deps): bump org.jetbrains.dokka:dokka-maven-plugin from 2.1.0 to 2.2.0 (https://github.com/sciencesakura/dbsetup-csv/pull/74).
 
 ## [3.0.2] - 2026-02-21
 ### Added
