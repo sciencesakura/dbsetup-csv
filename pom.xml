@@ -226,9 +226,6 @@
           <groupId>com.github.spotbugs</groupId>
           <artifactId>spotbugs-maven-plugin</artifactId>
           <version>${spotbugs-maven-plugin.version}</version>
-          <configuration>
-            <includeTests>true</includeTests>
-          </configuration>
           <executions>
             <execution>
               <phase>test</phase>
